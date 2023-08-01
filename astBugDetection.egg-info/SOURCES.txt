@@ -1,0 +1,7 @@
+README.md
+setup.py
+astBugDetection.egg-info/PKG-INFO
+astBugDetection.egg-info/SOURCES.txt
+astBugDetection.egg-info/dependency_links.txt
+astBugDetection.egg-info/requires.txt
+astBugDetection.egg-info/top_level.txt
