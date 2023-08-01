@@ -42,8 +42,8 @@ def main(cfg, gpu, save_dir):
     #valtransform = ''
 
     #important
-    #trainset = get_dataset(dataset_cfg , 'train')
-    #valset = get_dataset(dataset_cfg , 'val')
+    trainset = get_dataset(dataset_cfg , 'train')
+    valset = get_dataset(dataset_cfg , 'val')
     #trainset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'train')
     #valset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'val')
 

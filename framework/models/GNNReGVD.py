@@ -61,8 +61,10 @@ class PredictionClassification(nn.Module):
 class GNNReGVD(nn.Module):
     def __init__(self, encoder, config, tokenizer, args):
         super(GNNReGVD, self).__init__()
+        from types import SimpleNamespace
+        args = SimpleNamespace(**args)
+        self.args = args
         #self.encoder = ?
-        self.config = config
         
         config_class, model_class, tokenizer_class = MODEL_CLASSES[tokenizer]
         
@@ -77,9 +79,10 @@ class GNNReGVD(nn.Module):
                                                        )#cache_dir=args.cache_dir if args.cache_dir else None)
         self.tokenizer = tokenizer
         
-        from types import SimpleNamespace
-        args = SimpleNamespace(**args)
-        self.args = args
+        config = config_class.from_pretrained(args.config_name if args.config_name else args.model_name_or_path,
+                                             )#cache_dir=args.cache_dir if args.cache_dir else None)
+        config.num_labels=1
+        self.config = config
 
         self.w_embeddings = self.encoder.roberta.embeddings.word_embeddings.weight.data.cpu().detach().clone().numpy()
         self.tokenizer = tokenizer
