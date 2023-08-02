@@ -12,13 +12,11 @@ from framework.models import *
 from framework.datasets import *
 from framework.metrics import Metrics
 from framework.utils.utils import setup_cudnn
+from framework.dataset import get_dataset
+from framework.model import get_model
 
 '''
-from semseg.models import *
-from semseg.datasets import *
 from semseg.augmentations import get_val_augmentation
-from semseg.metrics import Metrics
-from semseg.utils.utils import setup_cudnn
 '''
 
 
@@ -41,71 +39,40 @@ def evaluate(model, dataloader, device):
     pr_auc = metrics.compute_pr_auc()
 
     return acc, f1, rec, prec, roc_auc, pr_auc
-'''
-@torch.no_grad()
-def evaluate_msf(model, dataloader, device, scales, flip):
-    model.eval()
-
-    n_classes = dataloader.dataset.n_classes
-    metrics = Metrics(n_classes, dataloader.dataset.ignore_label, device)
-
-    for images, labels in tqdm(dataloader):
-        labels = labels.to(device)
-        B, H, W = labels.shape
-        scaled_logits = torch.zeros(B, n_classes, H, W).to(device)
-
-        for scale in scales:
-            new_H, new_W = int(scale * H), int(scale * W)
-            new_H, new_W = int(math.ceil(new_H / 32)) * 32, int(math.ceil(new_W / 32)) * 32
-            scaled_images = F.interpolate(images, size=(new_H, new_W), mode='bilinear', align_corners=True)
-            scaled_images = scaled_images.to(device)
-            logits = model(scaled_images)
-            logits = F.interpolate(logits, size=(H, W), mode='bilinear', align_corners=True)
-            scaled_logits += logits.softmax(dim=1)
-
-            if flip:
-                scaled_images = torch.flip(scaled_images, dims=(3,))
-                logits = model(scaled_images)
-                logits = torch.flip(logits, dims=(3,))
-                logits = F.interpolate(logits, size=(H, W), mode='bilinear', align_corners=True)
-                scaled_logits += logits.softmax(dim=1)
-
-        metrics.update(scaled_logits, labels)
-    
-    acc, macc = metrics.compute_pixel_acc()
-    f1, mf1 = metrics.compute_f1()
-    ious, miou = metrics.compute_iou()
-    return acc, macc, f1, mf1, ious, miou
-'''
 
 def main(cfg):
     device = torch.device(cfg['DEVICE'])
 
     eval_cfg = cfg['EVAL']
     #transform = get_val_augmentation(eval_cfg['IMAGE_SIZE'])
-    dataset = eval(cfg['DATASET']['NAME'])(cfg['DATASET']['ROOT'], 'val', transform)
-    dataloader = DataLoader(dataset, 1, num_workers=1, pin_memory=True)
+    valset = get_dataset(eval_cfg , 'val')
+    #dataset = eval(cfg['DATASET']['NAME'])(cfg['DATASET']['ROOT'], 'val', transform)
+    dataloader = DataLoader(valset, 1, num_workers=1, pin_memory=True)
 
     model_path = Path(eval_cfg['MODEL_PATH'])
     if not model_path.exists(): model_path = Path(cfg['SAVE_DIR']) / f"{cfg['MODEL']['NAME']}_{cfg['MODEL']['BACKBONE']}_{cfg['DATASET']['NAME']}.pth"
     print(f"Evaluating {model_path}...")
 
-    model = eval(cfg['MODEL']['NAME'])(cfg['MODEL']['BACKBONE'], dataset.n_classes)
+    model_cfg = cfg['MODEL']
+    model = get_model(model_cfg)#待测试
+    #model = eval(cfg['MODEL']['NAME'])(cfg['MODEL']['BACKBONE'], valset.n_classes)
     model.load_state_dict(torch.load(str(model_path), map_location='cpu'))
     model = model.to(device)
-    '''
-    if eval_cfg['MSF']['ENABLE']:
-        acc, macc, f1, mf1, ious, miou = evaluate_msf(model, dataloader, device, eval_cfg['MSF']['SCALES'], eval_cfg['MSF']['FLIP'])
-    else:
-        acc, macc, f1, mf1, ious, miou = evaluate(model, dataloader, device)
+
+    #if eval_cfg['MSF']['ENABLE']:
+    #    acc, f1, rec, prec, roc_auc, pr_auc = evaluate_msf(model, dataloader, device, eval_cfg['MSF']['SCALES'], eval_cfg['MSF']['FLIP'])
+    #else:
+    acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, dataloader, device)
 
     table = {
-        'Class': list(dataset.CLASSES) + ['Mean'],
-        'IoU': ious + [miou],
-        'F1': f1 + [mf1],
-        'Acc': acc + [macc]
+        'Class': list(valset.CLASSES) + ['Mean'],
+        'F1': f1 + [f1],
+        'Acc': acc + [acc],
+        'Rec': rec + [rec],
+        'Prec': prec + [prec],
+        'roc_auc': roc_auc + [roc_auc],
+        'pr_auc': pr_auc +[pr_auc]
     }
-    '''
     print(tabulate(table, headers='keys'))
 
 
