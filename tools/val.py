@@ -26,21 +26,21 @@ from semseg.utils.utils import setup_cudnn
 def evaluate(model, dataloader, device):
     print('Evaluating...')
     model.eval()
-    metrics = Metrics(dataloader.dataset.n_classes, dataloader.dataset.ignore_label, device)
-    '''
-    for images, labels in tqdm(dataloader):
-        images = images.to(device)
+    metrics = Metrics(dataloader.dataset.n_classes, device)
+    for input_x, labels in tqdm(dataloader):
+        input_x = input_x.to(device)
         labels = labels.to(device)
-        preds = model(images).softmax(dim=1)
+        preds = model(input_x).to(device)
         metrics.update(preds, labels)
     
-    ious, miou = metrics.compute_iou()
-    acc, macc = metrics.compute_pixel_acc()
-    f1, mf1 = metrics.compute_f1()
-    
-    return acc, macc, f1, mf1, ious, miou
-    '''
+    acc = metrics.compute_acc()
+    f1 = metrics.compute_f1()
+    rec = metrics.compute_rec()
+    prec = metrics.compute_prec()
+    roc_auc = metrics.compute_roc_auc()
+    pr_auc = metrics.compute_pr_auc()
 
+    return acc, f1, rec, prec, roc_auc, pr_auc
 '''
 @torch.no_grad()
 def evaluate_msf(model, dataloader, device, scales, flip):

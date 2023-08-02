@@ -26,7 +26,6 @@ from val import evaluate
 
 def main(cfg, gpu, save_dir):
     start = time.time()
-    #best_mIoU = 0.0
     best_Acc = 0.0
 
     num_workers = mp.cpu_count()
@@ -54,9 +53,7 @@ def main(cfg, gpu, save_dir):
     
 
     model = get_model(model_cfg)
-    print('test')
     print(model)
-    #model = eval(model_cfg['NAME'])(model_cfg['BACKBONE'], trainset.n_classes)
     
     #pretrained support
     #model.init_pretrained(model_cfg['PRETRAINED'])
@@ -73,7 +70,6 @@ def main(cfg, gpu, save_dir):
 
     iters_per_epoch = len(trainset) // train_cfg['BATCH_SIZE']
     # class_weights = trainset.class_weights.to(device)
-    #loss_fn = get_loss(loss_cfg['NAME'], trainset.ignore_label, None)
     loss_fn = get_loss(loss_cfg['NAME'])
     print(loss_fn)
     optimizer = get_optimizer(model, optim_cfg['NAME'], lr, optim_cfg['WEIGHT_DECAY'])
@@ -116,26 +112,21 @@ def main(cfg, gpu, save_dir):
         #eval_interval 
         if (epoch+1) % train_cfg['EVAL_INTERVAL'] == 0 or (epoch+1) == epochs:
             print('eval_interval:')
-            #miou = evaluate(model, valloader, device)[-1]
-            #writer.add_scalar('val/mIoU', miou, epoch)
-            #if acc > best_acc:
-            '''
-            if miou > best_mIoU:
-                best_mIoU = miou
+            acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)[-1]
+            writer.add_scalar('val/acc', acc, epoch)
+            if acc > best_Acc:
+                best_Acc = acc
                 torch.save(model.module.state_dict() if train_cfg['DDP'] else model.state_dict(), save_dir / f"{model_cfg['NAME']}_{model_cfg['BACKBONE']}_{dataset_cfg['NAME']}.pth")
-            print(f"Current mIoU: {miou} Best mIoU: {best_mIoU}")
-            '''
+            print(f"Current Accuracy: {acc} Best Accuracy: {best_Acc}")
 
     writer.close()
     pbar.close()
     end = time.gmtime(time.time() - start)
-    '''
     table = [
-        ['Best mIoU', f"{best_mIoU:.2f}"],
+        ['Best Acc', f"{best_Acc:.2f}"],
         ['Total Training Time', time.strftime("%H:%M:%S", end)]
     ]
     print(tabulate(table, numalign='right'))
-    '''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -145,7 +136,7 @@ if __name__ == '__main__':
     with open(args.cfg) as f:
         cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
-    #fix_seeds(3407)
+    fix_seeds(3407)
     setup_cudnn()
     gpu = setup_ddp()
     save_dir = Path(cfg['SAVE_DIR'])
