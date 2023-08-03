@@ -35,7 +35,7 @@ def convert_examples_to_features(js,tokenizer,args):
 
 
 class REVEAL(Dataset):
-    def __init__(self, root: str, split: str , tokenizer, args):
+    def __init__(self, root: str, split: str , tokenizer, args, preprocess):
             #port dataset
             assert split in ['train', 'val']
             #according to the 'split' to split the dataset
@@ -58,6 +58,9 @@ class REVEAL(Dataset):
                                                 do_lower_case = None,#args.do_lower_case,
                                                        )#cache_dir=args.cache_dir if args.cache_dir else None)
             
+            #preprocess
+            self.preprocess = preprocess
+
             self.examples = []
             with open(file_path) as f:
                 for line in f:
@@ -86,5 +89,16 @@ class REVEAL(Dataset):
     def __len__(self):
         return len(self.examples)
 
-    def __getitem__(self, i):       
-        return torch.tensor(self.examples[i].input_ids), torch.tensor(self.examples[i].label)
+    def __getitem__(self, i):
+        input_x = torch.tensor(self.examples[i].input_ids)
+        label = torch.tensor(self.examples[i].label)
+
+        if self.preprocess:
+            print("former data:")
+            print(input_x)
+            print(label)
+            input_x, label = self.preprocess(input_x, label)       
+            print("preprocessed data:")
+            print(input_x)
+            print(label)
+        return input_x, label

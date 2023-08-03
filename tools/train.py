@@ -15,7 +15,6 @@ from torch import distributed as dist
 
 from framework.models import *
 from framework.datasets import * 
-#from framework.augmentations import get_train_augmentation, get_val_augmentation
 from framework.model import get_model
 from framework.dataset import get_dataset
 from framework.losses import get_loss
@@ -23,6 +22,20 @@ from framework.schedulers import get_scheduler
 from framework.optimizers import get_optimizer
 from framework.utils.utils import fix_seeds, setup_cudnn, cleanup_ddp, setup_ddp
 from val import evaluate
+
+#ordered load yaml files
+from collections import OrderedDict
+
+def ordered_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
+    class OrderedLoader(Loader):
+        pass
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping)
+    return yaml.load(stream, OrderedLoader)
 
 def main(cfg, gpu, save_dir):
     start = time.time()
@@ -35,23 +48,15 @@ def main(cfg, gpu, save_dir):
     loss_cfg, optim_cfg, sched_cfg = cfg['LOSS'], cfg['OPTIMIZER'], cfg['SCHEDULER']
     epochs, lr = train_cfg['EPOCHS'], optim_cfg['LR']
     
-    #traintransform = get_train_augmentation(train_cfg['IMAGE_SIZE'], seg_fill=dataset_cfg['IGNORE_LABEL'])
-    #valtransform = get_val_augmentation(eval_cfg['IMAGE_SIZE'])
-    #traintransform = ''
-    #valtransform = ''
-
     #important
-    trainset = get_dataset(dataset_cfg , 'train')
-    valset = get_dataset(dataset_cfg , 'val')
-    #trainset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'train')
-    #valset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'val')
+    trainset = get_dataset(cfg , 'train')
+    valset = get_dataset(cfg , 'val')
 
     '''
     trainset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'train', traintransform)
     valset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'val', valtransform)
     '''
     
-
     model = get_model(model_cfg)
     print(model)
     
@@ -134,7 +139,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     with open(args.cfg) as f:
-        cfg = yaml.load(f, Loader=yaml.SafeLoader)
+        ordered_dict = ordered_load(f, yaml.SafeLoader)
+        cfg = ordered_dict
+    #with open(args.cfg) as f:
+    #    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
     fix_seeds(3407)
     setup_cudnn()

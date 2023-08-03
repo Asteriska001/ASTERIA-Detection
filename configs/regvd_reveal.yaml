@@ -38,6 +38,14 @@ DATASET:
       test_data_file : '../dataset/test.jsonl'
       block_size     : 400
       training_percent: 1.0
+  PREPROCESS:
+    ENABLE      : False
+    COMPOSE     : [ 
+                "Normalize",
+                "PadSequence",
+                "OneHotEncode"
+        ]
+      
 
 
 TRAIN:
