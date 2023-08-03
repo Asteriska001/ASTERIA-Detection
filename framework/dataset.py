@@ -38,7 +38,7 @@ def get_dataset(config, split):
 
             if split == 'train':
                 preprocess_format = get_preprocess(train_cfg['INPUT_SIZE'], preprocess_compose)
-            elif split == 'test':
+            elif split == 'val':
                 preprocess_format = get_preprocess(eval_cfg['INPUT_SIZE'], preprocess_compose)
             else:
                 print(split)

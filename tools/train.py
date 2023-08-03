@@ -76,7 +76,7 @@ def main(cfg, gpu, save_dir):
     iters_per_epoch = len(trainset) // train_cfg['BATCH_SIZE']
     # class_weights = trainset.class_weights.to(device)
     loss_fn = get_loss(loss_cfg['NAME'])
-    print(loss_fn)
+    print('loss func: '+ str(loss_fn))
     optimizer = get_optimizer(model, optim_cfg['NAME'], lr, optim_cfg['WEIGHT_DECAY'])
     scheduler = get_scheduler(sched_cfg['NAME'], optimizer, epochs * iters_per_epoch, sched_cfg['POWER'], iters_per_epoch * sched_cfg['WARMUP'], sched_cfg['WARMUP_RATIO'])
     scaler = GradScaler(enabled=train_cfg['AMP'])

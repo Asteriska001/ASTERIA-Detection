@@ -6,9 +6,10 @@ from typing import Tuple, List, Union, Tuple, Optional
 
 
 from torch.nn.utils.rnn import pad_sequence
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
+#from torchtext.data.utils import get_tokenizer
+#from torchtext.vocab import build_vocab_from_iterator
 
+'''
 class Tokenize:
     def __init__(self):
         self.tokenizer = get_tokenizer('basic_english')
@@ -25,7 +26,7 @@ class VocabularyMapping:
     def __call__(self, input_x: Tensor, label: Tensor) -> Tuple[Tensor, Tensor]:
         input_x = torch.tensor([self.vocab[token] for token in input_x])
         return input_x, label
-
+'''
 class LengthNormalization:
     def __init__(self, max_length: int = 500):
         self.max_length = max_length
@@ -98,8 +99,8 @@ def get_preprocess(size: Union[int, Tuple[int], List[int]], preprocess_format):
         "Normalize": Normalize(),
         "PadSequence": PadSequence(),
         "OneHotEncode": OneHotEncode(),
-        'Tokenize': Tokenize(),
-        'VocabularyMapping': VocabularyMapping(vocab),
+        #'Tokenize': Tokenize(),
+        #'VocabularyMapping': VocabularyMapping(vocab),
         'LengthNormalization': LengthNormalization(),
         'Shuffle': Shuffle()
 
@@ -108,7 +109,7 @@ def get_preprocess(size: Union[int, Tuple[int], List[int]], preprocess_format):
     if preprocess_format is None:
         return Compose([])
     else:
-        print("Preprocessing: ")
+        print("Preprocessing Compose: ")
         print(preprocess_format)
         return Compose([preprocess_methods[method] for method in preprocess_format])
 

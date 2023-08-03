@@ -3,7 +3,7 @@ from framework import models
 from framework import datasets
 #from framework.models import backbones, heads
 
-from framework import representations
+#from framework import representations
 
 
 def show_models():

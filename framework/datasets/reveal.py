@@ -35,7 +35,7 @@ def convert_examples_to_features(js,tokenizer,args):
 
 
 class REVEAL(Dataset):
-    def __init__(self, root: str, split: str , tokenizer, args, preprocess):
+    def __init__(self, root: str, split: str , tokenizer, preprocess_format, args):
             #port dataset
             assert split in ['train', 'val']
             #according to the 'split' to split the dataset
@@ -59,7 +59,7 @@ class REVEAL(Dataset):
                                                        )#cache_dir=args.cache_dir if args.cache_dir else None)
             
             #preprocess
-            self.preprocess = preprocess
+            self.preprocess = preprocess_format
 
             self.examples = []
             with open(file_path) as f:
@@ -95,10 +95,11 @@ class REVEAL(Dataset):
 
         if self.preprocess:
             print("former data:")
-            print(input_x)
-            print(label)
+            print(input_x.shape)
+            #print(label)
             input_x, label = self.preprocess(input_x, label)       
             print("preprocessed data:")
-            print(input_x)
-            print(label)
+            print(input_x.shape)
+            #print(label)
+            assert 0 == 1
         return input_x, label

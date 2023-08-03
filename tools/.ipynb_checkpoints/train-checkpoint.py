@@ -15,7 +15,6 @@ from torch import distributed as dist
 
 from framework.models import *
 from framework.datasets import * 
-#from framework.augmentations import get_train_augmentation, get_val_augmentation
 from framework.model import get_model
 from framework.dataset import get_dataset
 from framework.losses import get_loss
@@ -24,9 +23,22 @@ from framework.optimizers import get_optimizer
 from framework.utils.utils import fix_seeds, setup_cudnn, cleanup_ddp, setup_ddp
 from val import evaluate
 
+#ordered load yaml files
+from collections import OrderedDict
+
+def ordered_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
+    class OrderedLoader(Loader):
+        pass
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping)
+    return yaml.load(stream, OrderedLoader)
+
 def main(cfg, gpu, save_dir):
     start = time.time()
-    #best_mIoU = 0.0
     best_Acc = 0.0
 
     num_workers = mp.cpu_count()
@@ -36,27 +48,17 @@ def main(cfg, gpu, save_dir):
     loss_cfg, optim_cfg, sched_cfg = cfg['LOSS'], cfg['OPTIMIZER'], cfg['SCHEDULER']
     epochs, lr = train_cfg['EPOCHS'], optim_cfg['LR']
     
-    #traintransform = get_train_augmentation(train_cfg['IMAGE_SIZE'], seg_fill=dataset_cfg['IGNORE_LABEL'])
-    #valtransform = get_val_augmentation(eval_cfg['IMAGE_SIZE'])
-    #traintransform = ''
-    #valtransform = ''
-
     #important
-    trainset = get_dataset(dataset_cfg , 'train')
-    valset = get_dataset(dataset_cfg , 'val')
-    #trainset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'train')
-    #valset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'val')
+    trainset = get_dataset(cfg , 'train')
+    valset = get_dataset(cfg , 'val')
 
     '''
     trainset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'train', traintransform)
     valset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'val', valtransform)
     '''
     
-
     model = get_model(model_cfg)
-    print('test')
     print(model)
-    #model = eval(model_cfg['NAME'])(model_cfg['BACKBONE'], trainset.n_classes)
     
     #pretrained support
     #model.init_pretrained(model_cfg['PRETRAINED'])
@@ -73,9 +75,8 @@ def main(cfg, gpu, save_dir):
 
     iters_per_epoch = len(trainset) // train_cfg['BATCH_SIZE']
     # class_weights = trainset.class_weights.to(device)
-    #loss_fn = get_loss(loss_cfg['NAME'], trainset.ignore_label, None)
     loss_fn = get_loss(loss_cfg['NAME'])
-    print(loss_fn)
+    print('loss func: '+ str(loss_fn))
     optimizer = get_optimizer(model, optim_cfg['NAME'], lr, optim_cfg['WEIGHT_DECAY'])
     scheduler = get_scheduler(sched_cfg['NAME'], optimizer, epochs * iters_per_epoch, sched_cfg['POWER'], iters_per_epoch * sched_cfg['WARMUP'], sched_cfg['WARMUP_RATIO'])
     scaler = GradScaler(enabled=train_cfg['AMP'])
@@ -116,26 +117,21 @@ def main(cfg, gpu, save_dir):
         #eval_interval 
         if (epoch+1) % train_cfg['EVAL_INTERVAL'] == 0 or (epoch+1) == epochs:
             print('eval_interval:')
-            #miou = evaluate(model, valloader, device)[-1]
-            #writer.add_scalar('val/mIoU', miou, epoch)
-            #if acc > best_acc:
-            '''
-            if miou > best_mIoU:
-                best_mIoU = miou
+            acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)[-1]
+            writer.add_scalar('val/acc', acc, epoch)
+            if acc > best_Acc:
+                best_Acc = acc
                 torch.save(model.module.state_dict() if train_cfg['DDP'] else model.state_dict(), save_dir / f"{model_cfg['NAME']}_{model_cfg['BACKBONE']}_{dataset_cfg['NAME']}.pth")
-            print(f"Current mIoU: {miou} Best mIoU: {best_mIoU}")
-            '''
+            print(f"Current Accuracy: {acc} Best Accuracy: {best_Acc}")
 
     writer.close()
     pbar.close()
     end = time.gmtime(time.time() - start)
-    '''
     table = [
-        ['Best mIoU', f"{best_mIoU:.2f}"],
+        ['Best Acc', f"{best_Acc:.2f}"],
         ['Total Training Time', time.strftime("%H:%M:%S", end)]
     ]
     print(tabulate(table, numalign='right'))
-    '''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -143,9 +139,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     with open(args.cfg) as f:
-        cfg = yaml.load(f, Loader=yaml.SafeLoader)
+        ordered_dict = ordered_load(f, yaml.SafeLoader)
+        cfg = ordered_dict
+    #with open(args.cfg) as f:
+    #    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
-    #fix_seeds(3407)
+    fix_seeds(3407)
     setup_cudnn()
     gpu = setup_ddp()
     save_dir = Path(cfg['SAVE_DIR'])
