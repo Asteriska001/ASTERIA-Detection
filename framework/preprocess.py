@@ -140,21 +140,4 @@ class Compose:
         return input_x, label
 
 
-
-def get_preprocess(size: Union[int, Tuple[int], List[int]], preprocess_format=None):
-    return Compose([
-
-    ])
-
-
-if __name__ == '__main__':
-    input_x = ''
-    label_x = ''
-    aug = Compose([
-        Process1(),
-        Process2(),
-    ])
-
-    input_x, label_x = aug(input_x, label_x)
-    print(input_x.shape, label_x.shape)
 '''
