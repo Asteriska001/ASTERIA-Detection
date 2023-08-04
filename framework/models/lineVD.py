@@ -20,9 +20,9 @@ class RobertaClassificationHead(nn.Module):
         x = self.out_proj(x)
         return x
         
-class Model(RobertaForSequenceClassification):   
+class LineVD(RobertaForSequenceClassification):   
     def __init__(self, encoder, config, tokenizer, args):
-        super(Model, self).__init__(config=config)
+        super(LineVD, self).__init__(config=config)
         self.encoder = encoder
         self.tokenizer = tokenizer
         self.classifier = RobertaClassificationHead(config)
