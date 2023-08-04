@@ -94,12 +94,12 @@ class REVEAL(Dataset):
         label = torch.tensor(self.examples[i].label)
 
         if self.preprocess:
-            print("former data:")
-            print(input_x.shape)
+            #print("former data:")
+            #print(input_x.shape)
             #print(label)
             input_x, label = self.preprocess(input_x, label)       
-            print("preprocessed data:")
-            print(input_x.shape)
+            #print("preprocessed data:")
+            #print(input_x.shape)
             #print(label)
-            assert 0 == 1
+            #assert 0 == 1
         return input_x, label

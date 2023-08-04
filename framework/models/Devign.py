@@ -10,6 +10,7 @@ from torch.nn import CrossEntropyLoss, MSELoss
 from .modules.GNN.modulesGNN import *
 from .modules.GNN.utils import preprocess_features, preprocess_adj
 from .modules.GNN.utils import *
+from framework.models.modules.transformers.transformers import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -59,16 +60,38 @@ class PredictionClassification(nn.Module):
 class Devign(nn.Module):
     def __init__(self, encoder, config, tokenizer, args):
         super(Devign, self).__init__()
-        self.encoder = encoder
-        self.config = config
-        self.tokenizer = tokenizer
+        #ast modified
+        from types import SimpleNamespace
+        args = SimpleNamespace(**args)
         self.args = args
+        
+        config_class, model_class, tokenizer_class = MODEL_CLASSES[tokenizer]
+        
+        config = config_class.from_pretrained(args.config_name if args.config_name else args.model_name_or_path,
+                                             )#cache_dir=args.cache_dir if args.cache_dir else None)
+        self.config = config
+        
+        encoder = model_class.from_pretrained('microsoft/graphcodebert-base',#args.model_name_or_path,
+                                            #from_tf=bool('.ckpt' in args.model_name_or_path),
+                                            config=config,
+                                             )#cache_dir=args.cache_dir if args.cache_dir else None)
+        
+        self.encoder = encoder
+        
+        
+        tokenizer = tokenizer_class.from_pretrained('microsoft/graphcodebert-base',
+                                                do_lower_case = None,#args.do_lower_case,
+                                                       )#cache_dir=args.cache_dir if args.cache_dir else None)
+        self.tokenizer = tokenizer
 
         self.w_embeddings = self.encoder.roberta.embeddings.word_embeddings.weight.data.cpu().detach().clone().numpy()
         self.tokenizer = tokenizer
 
-        self.gnn = GGGNN(feature_dim_size=args.feature_dim_size, hidden_size=args.hidden_size,
-                         num_GNN_layers=args.num_GNN_layers, num_classes=args.num_classes, dropout=config.hidden_dropout_prob)
+        self.gnn = GGGNN(feature_dim_size=args.feature_dim_size, 
+                         hidden_size=args.hidden_size,
+                         num_GNN_layers=args.num_GNN_layers, 
+                         #num_classes=args.num_classes, 
+                         dropout=config.hidden_dropout_prob)
 
         self.conv_l1 = torch.nn.Conv1d(args.hidden_size, args.hidden_size, 3).double()
         self.maxpool1 = torch.nn.MaxPool1d(3, stride=2).double()

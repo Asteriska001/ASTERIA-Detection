@@ -9,6 +9,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 class BLSTM(nn.Module):
     def __init__(self, vectors, labels, name="", batch_size=64):
         super(BLSTM, self).__init__()
+        '''
         self.name = name
         self.batch_size = batch_size
 
@@ -23,6 +24,8 @@ class BLSTM(nn.Module):
         self.y_train = torch.tensor(y_train, dtype=torch.float32)
         self.X_test = torch.tensor(X_test, dtype=torch.float32)
         self.y_test = torch.tensor(y_test, dtype=torch.float32)
+        '''
+        
         
         self.lstm = nn.LSTM(input_size=vectors.shape[2], hidden_size=300, batch_first=True, bidirectional=True)
         self.fc1 = nn.Linear(600, 300)

@@ -94,7 +94,7 @@ def main(cfg, gpu, save_dir):
 
             input_x = input_x.to(device)
             lbl = lbl.to(device)
-            
+            print('input shape: '+str(input_x))
             with autocast(enabled=train_cfg['AMP']):
                 logits = model(input_x)
                 loss = loss_fn(logits, lbl)

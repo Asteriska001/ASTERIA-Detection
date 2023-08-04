@@ -12,6 +12,7 @@ def show_models():
     print(tabulate({'No.': numbers, 'Model Names': model_names}, headers='keys'))
 
 def show_representations():
+    print(type(representations))
     representation_names = representations.__all__
     numbers = list(range(1, len(representation_names)+1))
     print(tabulate({'No.': numbers, 'Representation Names': representation_names}, headers='keys'))
