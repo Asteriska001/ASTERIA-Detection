@@ -70,7 +70,7 @@ def main(cfg, gpu, save_dir):
     else:
         sampler = RandomSampler(trainset)
     
-    trainloader = DataLoader(trainset, batch_size=train_cfg['BATCH_SIZE'], num_workers=num_workers, drop_last=True, pin_memory=True, sampler=sampler)
+    trainloader = DataLoader(trainset, batch_size=train_cfg['BATCH_SIZE'], num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
     valloader = DataLoader(valset, batch_size=1, num_workers=1, pin_memory=True)
 
     iters_per_epoch = len(trainset) // train_cfg['BATCH_SIZE']
@@ -94,7 +94,7 @@ def main(cfg, gpu, save_dir):
 
             input_x = input_x.to(device)
             lbl = lbl.to(device)
-            print('input shape: '+str(input_x))
+            #print('input shape: '+str(input_x))
             with autocast(enabled=train_cfg['AMP']):
                 logits = model(input_x)
                 loss = loss_fn(logits, lbl)
@@ -117,7 +117,7 @@ def main(cfg, gpu, save_dir):
         #eval_interval 
         if (epoch+1) % train_cfg['EVAL_INTERVAL'] == 0 or (epoch+1) == epochs:
             print('eval_interval:')
-            acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)[-1]
+            acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)#[-1]
             writer.add_scalar('val/acc', acc, epoch)
             if acc > best_Acc:
                 best_Acc = acc

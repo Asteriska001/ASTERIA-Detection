@@ -36,6 +36,7 @@ def convert_examples_to_features(js,tokenizer,args):
 
 class REVEAL(Dataset):
     def __init__(self, root: str, split: str , tokenizer, preprocess_format, args):
+            self.n_classes = 2
             #port dataset
             assert split in ['train', 'val']
             #according to the 'split' to split the dataset
