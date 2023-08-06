@@ -41,4 +41,4 @@ class SmoothL1Loss(nn.Module):
 
 def get_loss(loss_fn_name: str = 'CrossEntropy'):
     assert loss_fn_name in __all__, f"Unavailable loss function name >> {loss_fn_name}.\nAvailable loss functions: {__all__}"
-    return eval(loss_fn_name)()
+    return eval(loss_fn_name)()#return torch.nn.CrossEntropyLoss()

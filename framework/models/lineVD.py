@@ -31,6 +31,7 @@ class LineVD(RobertaForSequenceClassification):
         config_class, model_class, tokenizer_class = MODEL_CLASSES[tokenizer]
         config = config_class.from_pretrained(args.config_name if args.config_name else args.model_name_or_path,
                                              )#cache_dir=args.cache_dir if args.cache_dir else None)
+        config.num_labels = 1
         super(LineVD, self).__init__(config=config)
                 
         encoder = model_class.from_pretrained('microsoft/graphcodebert-base',#args.model_name_or_path,
@@ -66,12 +67,19 @@ class LineVD(RobertaForSequenceClassification):
                 return prob, attentions
         else:
             if input_ids is not None:
+                outputs = self.encoder.roberta(input_ids, attention_mask=input_ids.ne(1), output_attentions=output_attentions)[0]
+            else:
+                input_ids = input_embed.long()
+                outputs = self.encoder.roberta(input_ids=input_ids, output_attentions=output_attentions)[0]
+            '''
+            if input_ids is not None:
                 #need fix.
                 outputs = self.encoder.roberta(input_ids, attention_mask=input_ids.ne(1), output_attentions=output_attentions)[0]
             else:
                 input_ids = input_embed.long()
                 outputs = self.encoder.roberta(input_ids=input_ids, output_attentions=output_attentions)
                 #outputs = self.encoder.roberta(inputs_embeds=input_embed, output_attentions=output_attentions)#[0]
+            '''
             logits = self.classifier(outputs)
             prob = torch.softmax(logits, dim=-1)
             if labels is not None:

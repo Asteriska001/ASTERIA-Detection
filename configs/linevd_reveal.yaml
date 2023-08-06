@@ -39,7 +39,7 @@ DATASET:
       block_size     : 400
       training_percent: 1.0
   PREPROCESS:
-    ENABLE      : True
+    ENABLE      : False
     COMPOSE     : [ 
                 "Normalize",
                 "PadSequence",
