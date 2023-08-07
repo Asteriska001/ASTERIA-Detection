@@ -14,6 +14,41 @@ ASTERIA Detection aims to transform the landscape of security in computing syste
 - **Abundant Datasets**: Offers a wide variety of datasets to train and test the models, providing a versatile environment for experimentation.
 - **Ease of Use**: Designed with the user in mind, ASTERIA offers an intuitive interface that makes implementing and modifying state-of-the-art (SOTA) vulnerability detection models a breeze.
 
+### Model Zoo
+Supported Models:
+- [Devign](https://github.com/epicosy/devign)
+- [ReGVD](https://github.com/daiquocnguyen/GNN-ReGVD)
+- [LineVul](https://github.com/awsm-research/LineVul/blob/main/linevul/linevul_main.py)
+- VulDeePecker
+- TextCNN
+- VulCNN
+- transformers
+
+### Supported Datasets
+- REVEAL
+- FFMPEG + Qemu
+- SARD/NVD
+- MSR_20_CODE
+- CODEXGLUE
+- ...
+
+### Supported Preprocess Methods
+- "Normalize"
+- "PadSequence"
+- "OneHotEncode"
+- 'Tokenize'
+- 'VocabularyMapping'
+- 'LengthNormalization'
+- 'Shuffle'
+- ...
+  
+### Supported Representations Methods
+- **AST Graph extractor / AST Graph builder**
+- **LLVM Graph extractor / builder**
+- **Syntax extractor / builder**
+- **Vectorizers/word2vec**
+- ...
+
 ### Quick Start
 
 Getting started with ASTERIA Detection is simple and straightforward. Follow the installation instructions in the provided documentation, and you'll be ready to explore and customize the wide array of vulnerability detection models.
