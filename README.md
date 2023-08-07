@@ -1,4 +1,4 @@
-# ASTERIA Detection: Architecture for Secure Testing with Extensible Resourceful Intelligence and Adaptation
+# ASTERIA Detection: Architecture for Security Testing with Extensible Resourceful Intelligence and Adaptation
 
 ## Deeplearning-based Vulnerability Detection Framework
 
