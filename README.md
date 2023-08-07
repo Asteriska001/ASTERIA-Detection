@@ -47,6 +47,7 @@ Supported Models:
 - **LLVM Graph extractor / builder**
 - **Syntax extractor / builder**
 - **Vectorizers/word2vec**
+- **sent2vec**
 - ...
 
 ### Quick Start
