@@ -1,6 +1,7 @@
 from tabulate import tabulate
 from framework import models
 from framework import datasets
+from framework import losses
 #from framework.models import backbones, heads
 
 #from framework import representations
@@ -17,6 +18,11 @@ def show_representations():
     numbers = list(range(1, len(representation_names)+1))
     print(tabulate({'No.': numbers, 'Representation Names': representation_names}, headers='keys'))
 
+def show_losses():
+    loss_names = losses.__all__
+    numbers = list(range(1, len(loss_names)+1))
+    print(tabulate({'No.': numbers, 'Loss Names': loss_names}, headers='keys'))
+
 '''
 def show_backbones():
     backbone_names = backbones.__all__
@@ -27,12 +33,6 @@ def show_backbones():
         except:
             variants.append('-')
     print(tabulate({'Backbone Names': backbone_names, 'Variants': variants}, headers='keys'))
-
-
-def show_heads():
-    head_names = heads.__all__
-    numbers = list(range(1, len(head_names)+1))
-    print(tabulate({'No.': numbers, 'Heads': head_names}, headers='keys'))
 '''
 
 def show_datasets():
