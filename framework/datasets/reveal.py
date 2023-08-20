@@ -38,7 +38,7 @@ class REVEAL(Dataset):
     def __init__(self, root: str, split: str , tokenizer, preprocess_format, args):
             self.n_classes = 2
             #port dataset
-            assert split in ['train', 'val']
+            assert split in ['train', 'val', 'test']
             #according to the 'split' to split the dataset
             #split = 'training' if split == 'train' else 'validation'
             print(args)

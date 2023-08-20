@@ -6,7 +6,8 @@ from framework.preprocess import get_preprocess
 
 #手动构建字典
 DATASETS_DICT = {
-    'REVEAL': REVEAL
+    'REVEAL': REVEAL,
+    'Devign_Partial': Devign_Partial
 }
 
 

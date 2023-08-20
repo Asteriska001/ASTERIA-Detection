@@ -51,11 +51,6 @@ def main(cfg, gpu, save_dir):
     #important
     trainset = get_dataset(cfg , 'train')
     valset = get_dataset(cfg , 'val')
-
-    '''
-    trainset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'train', traintransform)
-    valset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'val', valtransform)
-    '''
     
     model = get_model(model_cfg)
     print(model)
