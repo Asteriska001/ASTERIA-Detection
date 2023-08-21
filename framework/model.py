@@ -8,7 +8,8 @@ MODEL_DICT = {
     'GNNReGVD': GNNReGVD,
     'Devign': Devign,
     'LineVD': LineVD,
-    'BLSTM': BLSTM
+    'BLSTM': BLSTM,
+    'CodeXGLUE': CodeXGLUE_baseline
 }
 
 
