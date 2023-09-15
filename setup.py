@@ -19,5 +19,7 @@ setup(
         'fvcore',
         'einops',
         'rich',
+        'scikit-learn',
+        'cuml'
     ]
 )
