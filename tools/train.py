@@ -51,7 +51,14 @@ def main(cfg, gpu, save_dir):
     #important
     trainset = get_dataset(cfg , 'train')
     valset = get_dataset(cfg , 'val')
+    #todo fine tuning
+    #program modelling
+        #features extraction
+        #encoder -> encodings
     
+    #trainset = get_representation(cfg)
+    #valset = get_representation(cfg)
+
     model = get_model(model_cfg)
     print(model)
     
