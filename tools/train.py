@@ -64,6 +64,10 @@ def main(cfg, gpu, save_dir):
     
     #pretrained support
     #model.init_pretrained(model_cfg['PRETRAINED'])
+    '''
+    if model_cfg['PRETRAINED'] != None:
+        model = get_pretrained_model(model_cfg['PRETRAINED'])
+    '''
     model = model.to(device)
 
     if train_cfg['DDP']: 
