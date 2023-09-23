@@ -6,7 +6,9 @@ from framework.preprocess import get_preprocess
 
 #手动构建字典
 DATASETS_DICT = {
-    'REVEAL': REVEAL
+    'REVEAL': REVEAL,
+    'Devign_Partial': Devign_Partial,
+    'CodeXGLUE': CodeXGLUE
 }
 
 
@@ -24,7 +26,7 @@ def get_dataset(config, split):
     #待测试 不知道能不能直接把model——param的字典转为参数传递
     print(dataset_name)
     print(dataset_param)
-
+    print(DATASETS_DICT)
     if dataset_name in DATASETS_DICT:
         
         #preprocess dataset

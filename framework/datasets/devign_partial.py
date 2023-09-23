@@ -57,7 +57,7 @@ def train_val_test_split(data_frame: pd.DataFrame, shuffle=True):
 
 
 class Devign_Partial(Dataset):
-    def __init__(self, split: str, input_path="./devign_partial_data/input"):
+    def __init__(self, split: str, root:str, preprocess_format, input_path="./devign_partial_data/input"):
         input_dataset = loads(input_path)
         #port dataset
         assert split in ['train', 'val', 'test']

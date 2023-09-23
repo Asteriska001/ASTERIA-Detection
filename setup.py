@@ -20,6 +20,7 @@ setup(
         'einops',
         'rich',
         'scikit-learn',
-        'cuml'
+        'cuml',
+        'pandas'
     ]
 )

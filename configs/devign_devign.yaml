@@ -28,7 +28,7 @@ MODEL:
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
-  NAME          : REVEAL                                         # dataset name to be trained with (camvid, cityscapes, ade20k)
+  NAME          : Devign_Partial                                         # dataset name to be trained with (camvid, cityscapes, ade20k)
   ROOT          : 'data/ADEChallengeData2016'                         # dataset root path
   PARAMS:
       input_path: './devign_partial_data/input'
