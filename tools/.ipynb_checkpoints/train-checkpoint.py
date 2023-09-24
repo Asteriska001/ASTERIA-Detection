@@ -99,6 +99,8 @@ def main(cfg, gpu, save_dir):
         #for iter, (input_x, lbl) in pbar:
             #print(data)
             (input_x,lbl) = data
+            print("train max input:", torch.max(input_x[0]))
+            
             optimizer.zero_grad(set_to_none=True)
 
             input_x = input_x.to(device)

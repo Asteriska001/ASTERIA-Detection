@@ -12,13 +12,13 @@ class InputFeatures(object):
     """A single training/test features for a example."""
     def __init__(self,
                  input_codes,
-                 input_ids,
+                 #input_ids,
                  idx,
                  label,
 
     ):
         self.input_codes = input_codes
-        self.input_ids = input_ids
+        #self.input_ids = input_ids
         self.idx=str(idx)
         self.label=label
 
@@ -70,8 +70,10 @@ class test_source(Dataset):
         return len(self.examples)
 
     def __getitem__(self, i):
-        input_x = torch.tensor(self.examples[i].input_ids)
+        input_x = self.examples[i].input_codes
         label = torch.tensor(self.examples[i].label)
+        #input_x = torch.tensor(self.examples[i].input_ids)
+        #label = torch.tensor(self.examples[i].label)
 
         if self.preprocess:
             #print("former data:")
@@ -103,3 +105,8 @@ if __name__ == "__main__":
         'training_percent': 1.0
     }
     test_dataset = test_source('dataset', 'train', False, args)
+    for idx, (input_x, label) in enumerate(test_dataset):
+        print(f"Sample #{idx} - Input: {input_x}, Label: {label}")
+        if idx > 10:  # print only first 10 samples
+            break
+    
