@@ -6,12 +6,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import compute_class_weight
 from sklearn.metrics import confusion_matrix, accuracy_score
 
-class BLSTM(nn.Module):
+class VulDeepecker(nn.Module):
     def __init__(self, 
                  #vectors, 
                  #labels, 
                  name="", batch_size=64, **kwargs):
-        super(BLSTM, self).__init__()
+        super(VulDeepecker, self).__init__()
         '''
         self.name = name
         self.batch_size = batch_size
