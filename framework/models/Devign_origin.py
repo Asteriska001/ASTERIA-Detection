@@ -113,9 +113,9 @@ class Devign(nn.Module):
     def forward(self, input_ids=None, labels=None):
         # construct graph
         if self.args.format == "uni":
-            adj, x_feature = build_graph(input_ids.cpu().detach().numpy(), self.w_embeddings)
+            adj, x_feature = build_graph(input_ids.x.cpu().detach().numpy(), self.w_embeddings)
         else:
-            adj, x_feature = build_graph_text(input_ids.cpu().detach().numpy(), self.w_embeddings)
+            adj, x_feature = build_graph_text(input_ids.x.cpu().detach().numpy(), self.w_embeddings)
         # initilization
         adj, adj_mask = preprocess_adj(adj)
         adj_feature = preprocess_features(x_feature)

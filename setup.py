@@ -21,6 +21,7 @@ setup(
         'rich',
         'scikit-learn',
         'cuml',
-        'pandas'
+        'pandas',
+        'torch-geometric'
     ]
 )

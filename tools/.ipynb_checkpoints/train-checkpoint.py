@@ -6,6 +6,7 @@ import multiprocessing as mp
 from tabulate import tabulate
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 from torch.cuda.amp import GradScaler, autocast
@@ -51,17 +52,23 @@ def main(cfg, gpu, save_dir):
     #important
     trainset = get_dataset(cfg , 'train')
     valset = get_dataset(cfg , 'val')
-
-    '''
-    trainset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'train', traintransform)
-    valset = eval(dataset_cfg['NAME'])(dataset_cfg['ROOT'], 'val', valtransform)
-    '''
+    #todo fine tuning
+    #program modelling
+        #features extraction
+        #encoder -> encodings
     
+    #trainset = get_representation(cfg)
+    #valset = get_representation(cfg)
+
     model = get_model(model_cfg)
     print(model)
     
     #pretrained support
     #model.init_pretrained(model_cfg['PRETRAINED'])
+    '''
+    if model_cfg['PRETRAINED'] != None:
+        model = get_pretrained_model(model_cfg['PRETRAINED'])
+    '''
     model = model.to(device)
 
     if train_cfg['DDP']: 
@@ -88,8 +95,10 @@ def main(cfg, gpu, save_dir):
 
         train_loss = 0.0
         pbar = tqdm(enumerate(trainloader), total=iters_per_epoch, desc=f"Epoch: [{epoch+1}/{epochs}] Iter: [{0}/{iters_per_epoch}] LR: {lr:.8f} Loss: {train_loss:.8f}")
-
-        for iter, (input_x, lbl) in pbar:
+        for iter, data in pbar:
+        #for iter, (input_x, lbl) in pbar:
+            #print(data)
+            (input_x,lbl) = data
             optimizer.zero_grad(set_to_none=True)
 
             input_x = input_x.to(device)
