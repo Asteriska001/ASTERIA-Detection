@@ -1,90 +1,192 @@
-import torch
-from torch_geometric.nn import GCNConv, TopKPooling
-from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
-import torch.nn as nn
-import torch.nn.functional as F
+from torch import nn
 from omegaconf import DictConfig
+import torch
+from framework.datasets.XFGDataset.XFGDataset import XFGBatch
+from typing import Dict
+#from pytorch_lightning import LightningModule
+from .modules.gnns import GraphConvEncoder, GatedGraphConvEncoder
+from torch.optim import Adam, SGD, Adamax, RMSprop
+#from pytorch_lightning.utilities.types import EPOCH_OUTPUT
+import torch.nn.functional as F
+#from src.metrics import Statistic
+from torch_geometric.data import Batch
+from framework.datasets.XFGDataset.vocabulary import Vocabulary
 
 
-class GCNPoolBlockLayer(torch.nn.Module):
-    """graph conv-pool block
+class DeepWuKong(nn.Module):
+    r"""vulnerability detection model to detect vulnerability
 
-    graph convolutional + graph pooling + graph readout
-
-    :attr GCL: graph conv layer
-    :attr GPL: graph pooling layer
+    Args:
+        config (DictConfig): configuration for the model
+        vocabulary_size (int): the size of vacabulary
+        pad_idx (int): the index of padding token
     """
-    def __init__(self, config: DictConfig):
-        super(GCNPoolBlockLayer, self).__init__()
-        self._config = config
-        input_size = self._config.hyper_parameters.vector_length
-        self.layer_num = self._config.gnn.layer_num
-        self.input_GCL = GCNConv(input_size, config.gnn.hidden_size)
 
-        self.input_GPL = TopKPooling(config.gnn.hidden_size,
-                                     ratio=config.gnn.pooling_ratio)
-
-        for i in range(self.layer_num - 1):
-            setattr(self, f"hidden_GCL{i}",
-                    GCNConv(config.gnn.hidden_size, config.gnn.hidden_size))
-            setattr(
-                self, f"hidden_GPL{i}",
-                TopKPooling(config.gnn.hidden_size,
-                            ratio=config.gnn.pooling_ratio))
-
-    def forward(self, data):
-        x, edge_index, batch = data.x, data.edge_index, data.batch
-        x = F.relu(self.input_GCL(x, edge_index))
-        x, edge_index, _, batch, _, _ = self.input_GPL(x, edge_index, None,
-                                                       batch)
-        # (batch size, hidden)
-        out = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
-        for i in range(self.layer_num - 1):
-            x = F.relu(getattr(self, f"hidden_GCL{i}")(x, edge_index))
-            x, edge_index, _, batch, _, _ = getattr(self, f"hidden_GPL{i}")(
-                x, edge_index, None, batch)
-            out += torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
-
-        return out
-
-class DWK_GNN(nn.Module):
-    _activations = {
-        "relu": nn.ReLU(),
-        "sigmoid": nn.Sigmoid(),
-        "tanh": nn.Tanh(),
-        "lkrelu": nn.LeakyReLU(0.3)
+    _optimizers = {
+        "RMSprop": RMSprop,
+        "Adam": Adam,
+        "SGD": SGD,
+        "Adamax": Adamax
     }
-    def __init__(
-        self,
-        config: DictConfig,
-    ):
+
+    _encoders = {
+        "gcn": GraphConvEncoder,
+        "ggnn": GatedGraphConvEncoder
+    }
+
+    def __init__(self, config: DictConfig
+                # , vocab: Vocabulary, vocabulary_size: int,
+                # pad_idx: int
+                ):
         super().__init__()
-        self._config = config
         self.save_hyperparameters()
-        self.init_layers()
+        self.__config = config
 
-    def init_layers(self):
-        self.gnn_layer = GCNPoolBlockLayer(self._config)
-        self.lin1 = nn.Linear(self._config.gnn.hidden_size * 2,
-                              self._config.gnn.hidden_size)
-        self.dropout1 = nn.Dropout(self._config.classifier.drop_out)
-        self.lin2 = nn.Linear(self._config.gnn.hidden_size,
-                              self._config.gnn.hidden_size // 2)
-        self.dropout2 = nn.Dropout(self._config.classifier.drop_out)
-        self.lin3 = nn.Linear(self._config.gnn.hidden_size // 2, 2)
+        vocab = Vocabulary.build_from_w2v(config.gnn.w2v_path)
+        vocabulary_size = vocab.get_vocab_size()
+        pad_idx = vocab.get_pad_id()
 
-    def _get_activation(self, activation_name: str) -> torch.nn.Module:
-        if activation_name in self._activations:
-            return self._activations[activation_name]
-        raise KeyError(f"Activation {activation_name} is not supported")
 
-    def forward(self, batch):
-        # (batch size, hidden)
-        x = self.gnn_layer(batch)
-        act = self._get_activation(self._config.classifier.activation)
-        x = self.dropout1(act(self.lin1(x)))
-        x = self.dropout2(act(self.lin2(x)))
-        # (batch size, output size)
-        x = F.log_softmax(self.lin3(x), dim=-1)
-        return x
+        hidden_size = config.classifier.hidden_size
+        self.__graph_encoder = self._encoders[config.gnn.name](config.gnn, vocab, vocabulary_size,
+                                                               pad_idx)
+        # hidden layers
+        layers = [
+            nn.Linear(config.gnn.hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Dropout(config.classifier.drop_out)
+        ]
+        if config.classifier.n_hidden_layers < 1:
+            raise ValueError(
+                f"Invalid layers number ({config.classifier.n_hidden_layers})")
+        for _ in range(config.classifier.n_hidden_layers - 1):
+            layers += [
+                nn.Linear(hidden_size, hidden_size),
+                nn.ReLU(),
+                nn.Dropout(config.classifier.drop_out)
+            ]
+        self.__hidden_layers = nn.Sequential(*layers)
+        self.__classifier = nn.Linear(hidden_size, config.classifier.n_classes)
 
+    def forward(self, batch: Batch) -> torch.Tensor:
+        """
+
+        Args:
+            batch (Batch): [n_XFG (Data)]
+
+        Returns: classifier results: [n_method; n_classes]
+        """
+        # [n_XFG, hidden size]
+        graph_hid = self.__graph_encoder(batch)
+        hiddens = self.__hidden_layers(graph_hid)
+        # [n_XFG; n_classes]
+        return self.__classifier(hiddens)
+""" 
+    def _get_optimizer(self, name: str) -> torch.nn.Module:
+        if name in self._optimizers:
+            return self._optimizers[name]
+        raise KeyError(f"Optimizer {name} is not supported")
+
+    def configure_optimizers(self) -> Dict:
+        parameters = [self.parameters()]
+        optimizer = self._get_optimizer(
+            self.__config.hyper_parameters.optimizer)(
+            [{
+                "params": p
+            } for p in parameters],
+            self.__config.hyper_parameters.learning_rate)
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer,
+            lr_lambda=lambda epoch: self.__config.hyper_parameters.decay_gamma
+                                    ** epoch)
+        return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+    def _log_training_step(self, results: Dict):
+        self.log_dict(results, on_step=True, on_epoch=False)
+
+    def training_step(self, batch: XFGBatch,
+                      batch_idx: int) -> torch.Tensor:  # type: ignore
+        # [n_XFG; n_classes]
+        logits = self(batch.graphs)
+        loss = F.cross_entropy(logits, batch.labels)
+
+        result: Dict = {"train_loss": loss}
+        with torch.no_grad():
+            _, preds = logits.max(dim=1)
+            statistic = Statistic().calculate_statistic(
+                batch.labels,
+                preds,
+                2,
+            )
+            batch_metric = statistic.calculate_metrics(group="train")
+            result.update(batch_metric)
+            self._log_training_step(result)
+            self.log("F1",
+                     batch_metric["train_f1"],
+                     prog_bar=True,
+                     logger=False)
+        return {"loss": loss, "statistic": statistic}
+
+    def validation_step(self, batch: XFGBatch,
+                        batch_idx: int) -> torch.Tensor:  # type: ignore
+        # [n_XFG; n_classes]
+        logits = self(batch.graphs)
+        loss = F.cross_entropy(logits, batch.labels)
+
+        result: Dict = {"val_loss": loss}
+        with torch.no_grad():
+            _, preds = logits.max(dim=1)
+            statistic = Statistic().calculate_statistic(
+                batch.labels,
+                preds,
+                2,
+            )
+            batch_metric = statistic.calculate_metrics(group="val")
+            result.update(batch_metric)
+        return {"loss": loss, "statistic": statistic}
+
+    def test_step(self, batch: XFGBatch,
+                  batch_idx: int) -> torch.Tensor:  # type: ignore
+        # [n_XFG; n_classes]
+        logits = self(batch.graphs)
+        loss = F.cross_entropy(logits, batch.labels)
+
+        result: Dict = {"test_loss", loss}
+        with torch.no_grad():
+            _, preds = logits.max(dim=1)
+            statistic = Statistic().calculate_statistic(
+                batch.labels,
+                preds,
+                2,
+            )
+            batch_metric = statistic.calculate_metrics(group="test")
+            result.update(batch_metric)
+
+        return {"loss": loss, "statistic": statistic}
+
+    # ========== EPOCH END ==========
+    def _prepare_epoch_end_log(self, step_outputs: EPOCH_OUTPUT,
+                               step: str) -> Dict[str, torch.Tensor]:
+        with torch.no_grad():
+            losses = [
+                so if isinstance(so, torch.Tensor) else so["loss"]
+                for so in step_outputs
+            ]
+            mean_loss = torch.stack(losses).mean()
+        return {f"{step}_loss": mean_loss}
+
+    def _shared_epoch_end(self, step_outputs: EPOCH_OUTPUT, group: str):
+        log = self._prepare_epoch_end_log(step_outputs, group)
+        statistic = Statistic.union_statistics(
+            [out["statistic"] for out in step_outputs])
+        log.update(statistic.calculate_metrics(group))
+        self.log_dict(log, on_step=False, on_epoch=True)
+
+    def training_epoch_end(self, training_step_output: EPOCH_OUTPUT):
+        self._shared_epoch_end(training_step_output, "train")
+
+    def validation_epoch_end(self, validation_step_output: EPOCH_OUTPUT):
+        self._shared_epoch_end(validation_step_output, "val")
+
+    def test_epoch_end(self, test_step_output: EPOCH_OUTPUT):
+        self._shared_epoch_end(test_step_output, "test") """
