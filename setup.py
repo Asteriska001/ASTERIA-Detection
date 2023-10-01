@@ -22,6 +22,8 @@ setup(
         'scikit-learn',
         'cuml',
         'pandas',
-        'torch-geometric'
+        'torch-geometric',
+        'omegaconf',
+        'gensim'
     ]
 )

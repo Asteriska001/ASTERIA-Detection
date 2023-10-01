@@ -11,7 +11,8 @@ from os.path import exists
 from typing import List
 import torch
 from torch_geometric.data import Data,Batch
-from .vocabulary import Vocabulary
+from types import SimpleNamespace
+from .XFGDataset_utils.vocabulary import Vocabulary
 
 
 @dataclass(frozen=True)
@@ -129,17 +130,20 @@ class XFGBatch:
         self.labels = self.labels.to(device)
         self.graphs = self.graphs.to(device)
 
-class XFGDataset(Dataset):
-    def __init__(self, XFG_paths_json: str, config: DictConfig#, vocab: Vocabulary
+class DWK_Dataset(Dataset):
+    def __init__(self, split: str, root: str,preprocess_format,args
+                 #, vocab: Vocabulary,config: DictConfig,XFG_paths_json: str,
                 ) -> None:
         """
         Args:
             XFG_root_path: json file of list of XFG paths
         """
         super().__init__()
-        self.__config = config
+        args = SimpleNamespace(**args)
+        self.__args = args
+        
 
-        vocab = Vocabulary.build_from_w2v(config.gnn.w2v_path)
+        vocab = Vocabulary.build_from_w2v(args.w2v_path)
         #vocab_size = vocab.get_vocab_size()
         #pad_idx = vocab.get_pad_id()
 
@@ -160,7 +164,7 @@ class XFGDataset(Dataset):
     def __getitem__(self, index) -> XFGSample:
         xfg: XFG = self.__XFGs[index]
         return XFGSample(graph=xfg.to_torch(self.__vocab,
-                                            self.__config.dataset.token.max_parts),
+                                            self.__args.token_max_parts),
                          label=xfg.label)
 
     def get_n_samples(self):

@@ -2,13 +2,16 @@ import torch
 from torch import nn
 
 from framework.datasets import *
+from framework.datasets.XFGDataset_build import DWK_Dataset
 from framework.preprocess import get_preprocess
 
 #手动构建字典
 DATASETS_DICT = {
     'REVEAL': REVEAL,
     'Devign_Partial': Devign_Partial,
-    'CodeXGLUE': CodeXGLUE
+    'CodeXGLUE': CodeXGLUE,
+    'DWK_Dataset': DWK_Dataset,
+    'IVDDataset': IVDetectDataset
 }
 
 

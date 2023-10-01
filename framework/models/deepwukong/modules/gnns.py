@@ -3,7 +3,7 @@ import torch
 from torch_geometric.data import Batch
 from torch_geometric.nn import TopKPooling, GCNConv, GINEConv, GATv2Conv, GatedGraphConv, GlobalAttention
 import torch.nn.functional as F
-from framework.datasets.XFGDataset.vocabulary import Vocabulary
+from framework.datasets.XFGDataset_utils.vocabulary import Vocabulary
 from .common_layers import STEncoder
 
 

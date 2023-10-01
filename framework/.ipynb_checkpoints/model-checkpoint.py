@@ -12,7 +12,9 @@ MODEL_DICT = {
     'CodeXGLUE': CodeXGLUE_baseline,
     'Russell': Russell,
     'VulBERTa_CNN': VulBERTa_CNN,
-    'Concoction': Concoction
+    'Concoction': Concoction,
+    'DeepWuKong': DeepWuKong,
+    'IVDetect': IVDmodel
 }
 
 

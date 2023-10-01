@@ -6,6 +6,8 @@ import multiprocessing as mp
 from tabulate import tabulate
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+from torch_geometric.data import Data
+
 
 from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
@@ -37,6 +39,25 @@ def ordered_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
         yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
         construct_mapping)
     return yaml.load(stream, OrderedLoader)
+
+def custom_collate_fn(batch):
+    # batch是一个列表，其中的元素是您的数据集__getitem__返回的数据
+    # 例如：[(input_x1, label1), (input_x2, label2), ...]
+
+    # 分解输入和标签
+    input_xs = [item[0] for item in batch]
+    labels = [item[1] for item in batch]
+
+    # 我们不能简单地堆叠input_xs，因为edge_index的大小是不同的
+    # 所以我们将其保留为一个列表
+    data_list = []
+    for data, edge_index in input_xs:
+        data_list.append(Data(my_data=data, edge_index=edge_index))
+
+    # labels是一个简单的tensor列表，我们可以直接堆叠它们
+    labels = torch.stack(labels, dim=0)
+
+    return data_list, labels
 
 def main(cfg, gpu, save_dir):
     start = time.time()
@@ -77,8 +98,8 @@ def main(cfg, gpu, save_dir):
     else:
         sampler = RandomSampler(trainset)
     
-    trainloader = DataLoader(trainset, batch_size=train_cfg['BATCH_SIZE'], num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
-    valloader = DataLoader(valset, batch_size=1, num_workers=1, pin_memory=True)
+    trainloader = DataLoader(trainset, collate_fn = custom_collate_fn, batch_size=train_cfg['BATCH_SIZE'], num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
+    valloader = DataLoader(valset, collate_fn=custom_collate_fn, batch_size=1, num_workers=1, pin_memory=True)
 
     iters_per_epoch = len(trainset) // train_cfg['BATCH_SIZE']
     # class_weights = trainset.class_weights.to(device)
@@ -97,17 +118,24 @@ def main(cfg, gpu, save_dir):
         pbar = tqdm(enumerate(trainloader), total=iters_per_epoch, desc=f"Epoch: [{epoch+1}/{epochs}] Iter: [{0}/{iters_per_epoch}] LR: {lr:.8f} Loss: {train_loss:.8f}")
         for iter, data in pbar:
         #for iter, (input_x, lbl) in pbar:
-            #print(data)
+            print('pbar data')
+            print(data)
             (input_x,lbl) = data
-            print("train max input:", torch.max(input_x[0]))
+            print('input_x data')
+            print(input_x)
+            #print("train max input:", torch.max(input_x[0]))
             
             optimizer.zero_grad(set_to_none=True)
 
-            input_x = input_x.to(device)
-            lbl = lbl.to(device)
+            #input_x = tuple(torch.tensor(item).to(device) if isinstance(item, list) else item.to(device) for item in input_x)#tuple(tensor.to(device) for tensor in input_x)#input_x.to(device)
+            #lbl = lbl.to(device)
             #print('input shape: '+str(input_x))
             with autocast(enabled=train_cfg['AMP']):
-                logits = model(input_x)
+                #logits = model(input_x)
+                #data, edge_index = input_x
+                edge_index_list = [data.edge_index for data in input_x]
+                my_data_list = [data.my_data for data in input_x]
+                logits = model(my_data_list, edge_index_list)
                 loss = loss_fn(logits, lbl)
 
             scaler.scale(loss).backward()

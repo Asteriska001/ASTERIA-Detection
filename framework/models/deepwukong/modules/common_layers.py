@@ -3,7 +3,7 @@ from omegaconf import DictConfig
 import torch
 import numpy
 from gensim.models import KeyedVectors
-from framework.datasets.XFGDataset.vocabulary import Vocabulary
+from framework.datasets.XFGDataset_utils.vocabulary import Vocabulary
 from os.path import exists
 
 def linear_after_attn(in_dim: int, out_dim: int, activation: str) -> nn.Module:

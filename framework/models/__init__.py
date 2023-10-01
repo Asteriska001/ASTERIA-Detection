@@ -6,6 +6,8 @@ from .CodeXGLUE_baseline import CodeXGLUE_baseline
 from .Russell_et_net import Russell
 from .VulBERTa_CNN import VulBERTa_CNN
 from .Concoction import Concoction
+from .deepwukong.DWK_gnn import DeepWuKong
+from .IVDetect.IVDetect_model import IVDmodel
 
 __all__ = [
     'GNNReGVD',
@@ -15,5 +17,7 @@ __all__ = [
     'CodeXGLUE_baseline',
     'Russell',
     'VulBERTa_CNN',
-    'Concoction'
+    'Concoction',
+    'DeepWuKong',
+    'IVDmodel'
 ]
