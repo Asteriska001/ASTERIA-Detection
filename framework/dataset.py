@@ -89,12 +89,12 @@ def graph_collate_fn(batch):
     return data_list, labels
 
 def get_dataloader(config, split, dataset, batch_size, num_workers=1, **kw):
-    if config['dataloader'] == 'geometric':
+    if 'dataloader' in config and config['dataloader'] == 'geometric':
         if split == 'train':
-            return DataLoader(dataset, collate_fn = graph_collate_fn, batch_size=batch_size, num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
+            return DataLoader(dataset, collate_fn = graph_collate_fn, batch_size=batch_size, num_workers=num_workers, drop_last=True, pin_memory=False, sampler=kw['sampler'])
         return DataLoader(dataset, collate_fn=graph_collate_fn, batch_size=1, num_workers=1, pin_memory=True)
     
     #sequence dataset
     if split == 'train':
-        return DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
+        return DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, drop_last=True, pin_memory=False, sampler=kw['sampler'])
     return DataLoader(dataset, batch_size=1, num_workers=1, pin_memory=True)

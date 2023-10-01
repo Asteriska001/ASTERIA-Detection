@@ -21,6 +21,7 @@ MODEL:
 DATASET:
   NAME          : IVDDataset                                         # dataset name to be trained with (camvid, cityscapes, ade20k)
   ROOT          : 'data/ADEChallengeData2016'                         # dataset root path
+  dataloader    : 'geometric'
   PARAMS:
     args        :
         _datapoint_files : ''
