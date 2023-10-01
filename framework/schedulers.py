@@ -51,8 +51,8 @@ class WarmupPolyLR(WarmupLR):
     def get_main_ratio(self):
         real_iter = self.last_epoch - self.warmup_iter
         real_max_iter = self.max_iter - self.warmup_iter
-        print('\n real_iter, real_max_iter:')
-        print(real_iter,real_max_iter)
+        #print('\n real_iter, real_max_iter:')
+        #print(real_iter,real_max_iter)
         if real_max_iter == 0:
             alpha = 0  # or some other default value
         else:

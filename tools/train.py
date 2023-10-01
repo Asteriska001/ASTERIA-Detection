@@ -118,11 +118,11 @@ def main(cfg, gpu, save_dir):
         pbar = tqdm(enumerate(trainloader), total=iters_per_epoch, desc=f"Epoch: [{epoch+1}/{epochs}] Iter: [{0}/{iters_per_epoch}] LR: {lr:.8f} Loss: {train_loss:.8f}")
         for iter, data in pbar:
         #for iter, (input_x, lbl) in pbar:
-            print('pbar data')
-            print(data)
+            #print('pbar data')
+            #print(data)
             (input_x,lbl) = data
-            print('input_x data')
-            print(input_x)
+            #print('input_x data')
+            #print(input_x)
             #print("train max input:", torch.max(input_x[0]))
             
             optimizer.zero_grad(set_to_none=True)
@@ -136,6 +136,9 @@ def main(cfg, gpu, save_dir):
                 edge_index_list = [data.edge_index for data in input_x]
                 my_data_list = [data.my_data for data in input_x]
                 logits = model(my_data_list, edge_index_list)
+                #print(logits.shape)
+                #print(lbl.shape)
+                lbl = lbl.squeeze(1)
                 loss = loss_fn(logits, lbl)
 
             scaler.scale(loss).backward()

@@ -8,22 +8,5 @@ setup(
     author='Asteriska001',
     author_email='asteriska001@gmail.com',
     license='MIT',
-    packages=find_packages(include=['astBugDetection']),
-    install_requires=[
-        'tqdm',
-        'tabulate',
-        'numpy',
-        'scipy',
-        'matplotlib',
-        'tensorboard',
-        'fvcore',
-        'einops',
-        'rich',
-        'scikit-learn',
-        'cuml',
-        'pandas',
-        'torch-geometric',
-        'omegaconf',
-        'gensim'
-    ]
+    packages=find_packages(),
 )

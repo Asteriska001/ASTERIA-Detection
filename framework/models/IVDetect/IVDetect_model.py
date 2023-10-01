@@ -33,7 +33,7 @@ class ChildSumTreeLSTM(nn.Module):
         return c, h
 
     def forward(self, data):
-        print('start ChildSumTreeLSTM:')
+        #print('start ChildSumTreeLSTM:')
         #print(data.shape)
         
         tree = data[0]
@@ -93,21 +93,21 @@ class IVDmodel(torch.nn.Module):
         for my_data, edge_index in zip(data_list, edge_index_list):
             # Input data format: a list that contains main graph, feature 1, ..., feature 5. The feature 1 is tree
             # structured and features 2-5 are sequences.
-            print('my_data shape:')
+            #print('my_data shape:')
             #print(my_data.shape)
-            print('edge_index shape:')
-            print(edge_index.shape)
+            #print('edge_index shape:')
+            #print(edge_index.shape)
             #print(edge_index)
             feature_1 = my_data[1]
-            print(feature_1)
+            #print(feature_1)
             feature_2 = my_data[0]
-            print(feature_2)
+            #print(feature_2)
             feature_3 = my_data[2]
-            print(feature_3)
+            #print(feature_3)
             feature_4 = my_data[3]
-            print(feature_4)
+            #print(feature_4)
             feature_5 = my_data[4]
-            print(feature_5)
+            #print(feature_5)
             feature_vec1 = None
             # for every statement, get its AST subtree
             for i in range(len(feature_1)):
