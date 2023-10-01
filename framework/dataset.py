@@ -1,9 +1,15 @@
 import torch
 from torch import nn
+from torch.utils.data import DataLoader
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data import DistributedSampler, RandomSampler
+from torch import distributed as dist
 
 from framework.datasets import *
 from framework.datasets.XFGDataset_build import DWK_Dataset
 from framework.preprocess import get_preprocess
+
+from torch_geometric.data import Data
 
 #手动构建字典
 DATASETS_DICT = {
@@ -60,3 +66,35 @@ def get_dataset(config, split):
         dataset = None
 
     return dataset
+
+
+def graph_collate_fn(batch):
+    # batch是一个列表，其中的元素是您的数据集__getitem__返回的数据
+    # 例如：[(input_x1, label1), (input_x2, label2), ...]
+
+    # 分解输入和标签
+    input_xs = [item[0] for item in batch]
+    labels = [item[1] for item in batch]
+
+    # 我们不能简单地堆叠input_xs，因为edge_index的大小是不同的
+    # 所以我们将其保留为一个列表
+    data_list = []
+    for data, edge_index in input_xs:
+        data_list.append(Data(my_data=data, edge_index=edge_index))
+
+    # labels是一个简单的tensor列表，我们可以直接堆叠它们
+    labels = torch.stack(labels, dim=0)
+    labels = labels.squeeze(1)
+
+    return data_list, labels
+
+def get_dataloader(config, split, dataset, batch_size, num_workers=1, **kw):
+    if config['dataloader'] == 'geometric':
+        if split == 'train':
+            return DataLoader(dataset, collate_fn = graph_collate_fn, batch_size=batch_size, num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
+        return DataLoader(dataset, collate_fn=graph_collate_fn, batch_size=1, num_workers=1, pin_memory=True)
+    
+    #sequence dataset
+    if split == 'train':
+        return DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
+    return DataLoader(dataset, batch_size=1, num_workers=1, pin_memory=True)

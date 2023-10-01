@@ -84,7 +84,9 @@ class IVDmodel(torch.nn.Module):
                 exec('self.conv_{} = GCNConv(self.h_size, self.num_node_feature)'.format(i))
         self.relu = ReLU(inplace=True)
 
-    def forward(self, data_list, edge_index_list):
+    def forward(self, input_x):
+        edge_index_list = [data.edge_index for data in input_x]
+        data_list = [data.my_data for data in input_x]
         batch_outputs = []
         print('data_list')
         #print(data_list)
