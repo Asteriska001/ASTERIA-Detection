@@ -7,6 +7,7 @@ import json
 
 from dataclasses import dataclass
 import networkx as nx
+import pickle
 from os.path import exists
 from typing import List
 import torch
@@ -33,7 +34,8 @@ class XFG:
             xfg_nx: nx.DiGraph = xfg
         elif path is not None:
             assert exists(path), f"xfg {path} not exists!"
-            xfg_nx: nx.DiGraph = nx.read_gpickle(path)
+            with open(path, 'rb') as f:
+                xfg_nx: nx.DiGraph = pickle.load(f)#nx.read_gpickle(path)
         else:
             raise ValueError("invalid inputs!")
         self.__init_graph(xfg_nx)
@@ -147,13 +149,13 @@ class DWK_Dataset(Dataset):
         #vocab_size = vocab.get_vocab_size()
         #pad_idx = vocab.get_pad_id()
 
-        assert exists(XFG_paths_json), f"{XFG_paths_json} not exists!"
-        with open(XFG_paths_json, "r") as f:
+        assert exists(args.XFG_paths_json), f"{args.XFG_paths_json} not exists!"
+        with open(args.XFG_paths_json, "r") as f:
             __XFG_paths_all = list(json.load(f))
         self.__vocab = vocab
         self.__XFGs = list()
         for xfg_path in __XFG_paths_all:
-            xfg = XFG(path=xfg_path)
+            xfg = XFG(path='/root/autodl-tmp/' + xfg_path)
             # if len(xfg.nodes) != 0:
             self.__XFGs.append(xfg)
         self.__n_samples = len(self.__XFGs)

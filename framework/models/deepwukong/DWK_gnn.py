@@ -11,6 +11,7 @@ import torch.nn.functional as F
 #from src.metrics import Statistic
 from torch_geometric.data import Batch
 from framework.datasets.XFGDataset_utils.vocabulary import Vocabulary
+from types import SimpleNamespace
 
 
 class DeepWuKong(nn.Module):
@@ -34,39 +35,42 @@ class DeepWuKong(nn.Module):
         "ggnn": GatedGraphConvEncoder
     }
 
-    def __init__(self, config: DictConfig
-                # , vocab: Vocabulary, vocabulary_size: int,
-                # pad_idx: int
+    def __init__(self, **config
+                 #config: DictConfig
+                 # , vocab: Vocabulary, vocabulary_size: int,
+                 # pad_idx: int
                 ):
         super().__init__()
-        self.save_hyperparameters()
+        print(config)
+        #config = SimpleNamespace(**config)
+        #self.save_hyperparameters()
         self.__config = config
 
-        vocab = Vocabulary.build_from_w2v(config.gnn.w2v_path)
+        vocab = Vocabulary.build_from_w2v(config['gnn']['w2v_path'])
         vocabulary_size = vocab.get_vocab_size()
         pad_idx = vocab.get_pad_id()
 
 
-        hidden_size = config.classifier.hidden_size
-        self.__graph_encoder = self._encoders[config.gnn.name](config.gnn, vocab, vocabulary_size,
+        hidden_size = config['classifier']['hidden_size']
+        self.__graph_encoder = self._encoders[config['gnn']['name']](config['gnn'], vocab, vocabulary_size,
                                                                pad_idx)
         # hidden layers
         layers = [
-            nn.Linear(config.gnn.hidden_size, hidden_size),
+            nn.Linear(config['gnn']['hidden_size'], hidden_size),
             nn.ReLU(),
-            nn.Dropout(config.classifier.drop_out)
+            nn.Dropout(config['classifier']['drop_out'])
         ]
-        if config.classifier.n_hidden_layers < 1:
+        if config['classifier']['n_hidden_layers'] < 1:
             raise ValueError(
-                f"Invalid layers number ({config.classifier.n_hidden_layers})")
-        for _ in range(config.classifier.n_hidden_layers - 1):
+                f"Invalid layers number ({config['classifier']['n_hidden_layers']})")
+        for _ in range(config['classifier']['n_hidden_layers'] - 1):
             layers += [
                 nn.Linear(hidden_size, hidden_size),
                 nn.ReLU(),
-                nn.Dropout(config.classifier.drop_out)
+                nn.Dropout(config['classifier']['drop_out'])
             ]
         self.__hidden_layers = nn.Sequential(*layers)
-        self.__classifier = nn.Linear(hidden_size, config.classifier.n_classes)
+        self.__classifier = nn.Linear(hidden_size, config['classifier']['n_classes'])
 
     def forward(self, batch: Batch) -> torch.Tensor:
         """

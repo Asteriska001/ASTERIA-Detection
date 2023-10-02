@@ -23,20 +23,20 @@ class GraphConvEncoder(torch.nn.Module):
         self.__pad_idx = pad_idx
         self.__st_embedding = STEncoder(config, vocab, vocabulary_size, pad_idx)
 
-        self.input_GCL = GCNConv(config.rnn.hidden_size, config.hidden_size)
+        self.input_GCL = GCNConv(config['rnn']['hidden_size'], config['hidden_size'])
 
-        self.input_GPL = TopKPooling(config.hidden_size,
-                                     ratio=config.pooling_ratio)
+        self.input_GPL = TopKPooling(config['hidden_size'],
+                                     ratio=config['pooling_ratio'])
 
-        for i in range(config.n_hidden_layers - 1):
+        for i in range(config['n_hidden_layers'] - 1):
             setattr(self, f"hidden_GCL{i}",
-                    GCNConv(config.hidden_size, config.hidden_size))
+                    GCNConv(config['hidden_size'], config['hidden_size']))
             setattr(
                 self, f"hidden_GPL{i}",
-                TopKPooling(config.hidden_size,
-                            ratio=config.pooling_ratio))
+                TopKPooling(config['hidden_size'],
+                            ratio=config['pooling_ratio']))
 
-        self.attpool = GlobalAttention(torch.nn.Linear(config.hidden_size, 1))
+        self.attpool = GlobalAttention(torch.nn.Linear(config['hidden_size'], 1))
 
     def forward(self, batched_graph: Batch):
         # [n nodes; rnn hidden]
@@ -48,7 +48,7 @@ class GraphConvEncoder(torch.nn.Module):
                                                                     batch)
         # [n_XFG; XFG hidden dim]
         out = self.attpool(node_embedding, batch)
-        for i in range(self.__config.n_hidden_layers - 1):
+        for i in range(self.__config['n_hidden_layers'] - 1):
             node_embedding = F.relu(getattr(self, f"hidden_GCL{i}")(node_embedding, edge_index))
             node_embedding, edge_index, _, batch, _, _ = getattr(self, f"hidden_GPL{i}")(
                 node_embedding, edge_index, None, batch)
@@ -73,19 +73,19 @@ class GatedGraphConvEncoder(torch.nn.Module):
         self.__pad_idx = pad_idx
         self.__st_embedding = STEncoder(config, vocab, vocabulary_size, pad_idx)
 
-        self.input_GCL = GatedGraphConv(out_channels=config.hidden_size, num_layers=config.n_gru)
+        self.input_GCL = GatedGraphConv(out_channels=config['hidden_size'], num_layers=config['n_gru'])
 
-        self.input_GPL = TopKPooling(config.hidden_size,
-                                     ratio=config.pooling_ratio)
+        self.input_GPL = TopKPooling(config['hidden_size'],
+                                     ratio=config['pooling_ratio'])
 
-        for i in range(config.n_hidden_layers - 1):
+        for i in range(config['n_hidden_layers'] - 1):
             setattr(self, f"hidden_GCL{i}",
-                    GatedGraphConv(out_channels=config.hidden_size, num_layers=config.n_gru))
+                    GatedGraphConv(out_channels=config['hidden_size'], num_layers=config['n_gru']))
             setattr(
                 self, f"hidden_GPL{i}",
-                TopKPooling(config.hidden_size,
-                            ratio=config.pooling_ratio))
-        self.attpool = GlobalAttention(torch.nn.Linear(config.hidden_size, 1))
+                TopKPooling(config['hidden_size'],
+                            ratio=config['pooling_ratio']))
+        self.attpool = GlobalAttention(torch.nn.Linear(config['hidden_size'], 1))
 
     def forward(self, batched_graph: Batch):
         # [n nodes; rnn hidden]
@@ -97,7 +97,7 @@ class GatedGraphConvEncoder(torch.nn.Module):
                                                                     batch)
         # [n_XFG; XFG hidden dim]
         out = self.attpool(node_embedding, batch)
-        for i in range(self.__config.n_hidden_layers - 1):
+        for i in range(self.__config['n_hidden_layers'] - 1):
             node_embedding = F.relu(getattr(self, f"hidden_GCL{i}")(node_embedding, edge_index))
             node_embedding, edge_index, _, batch, _, _ = getattr(self, f"hidden_GPL{i}")(
                 node_embedding, edge_index, None, batch)

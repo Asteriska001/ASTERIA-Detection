@@ -103,6 +103,8 @@ def main(cfg, gpu, save_dir):
         #for iter, (input_x, lbl) in pbar:
             #print('pbar data')
             #print(data)
+            #input_x = data.graphs
+            #lbl = data.labels
             (input_x,lbl) = data
             #print('input_x data')
             #print(input_x)

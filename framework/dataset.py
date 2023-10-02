@@ -10,6 +10,8 @@ from framework.datasets.XFGDataset_build import DWK_Dataset
 from framework.preprocess import get_preprocess
 
 from torch_geometric.data import Data
+from typing import List
+
 
 #手动构建字典
 DATASETS_DICT = {
@@ -67,7 +69,21 @@ def get_dataset(config, split):
 
     return dataset
 
+from framework.datasets.XFGDataset_build import XFGSample,XFGBatch
+def graph_collate_fn(samples: List[XFGSample]) -> XFGBatch:
+    
+    """
+    Collate function for DataLoader.
+    Args:
+        samples (List[XFGSample]): List of XFGSamples
+    Returns:
+        XFGBatch: An object representing a batch of graphs and labels.
+    """
+    data = XFGBatch(XFGs=samples)
+    return data.graphs, data.labels#XFGBatch(XFGs=samples)
 
+
+'''
 def graph_collate_fn(batch):
     # batch是一个列表，其中的元素是您的数据集__getitem__返回的数据
     # 例如：[(input_x1, label1), (input_x2, label2), ...]
@@ -87,6 +103,7 @@ def graph_collate_fn(batch):
     labels = labels.squeeze(1)
 
     return data_list, labels
+'''
 
 def get_dataloader(config, split, dataset, batch_size, num_workers=1, **kw):
     if 'dataloader' in config and config['dataloader'] == 'geometric':

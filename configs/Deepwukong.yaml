@@ -3,22 +3,47 @@
 #	--block_size 400 --train_batch_size 128 --eval_batch_size 128 --max_grad_norm 1.0 --evaluate_during_training \
 #	--gnn ReGCN --learning_rate 5e-4 --epoch 100 --hidden_size 128 --num_GNN_layers 2 --format uni --window_size 5 \
 #	--seed 123456 2>&1 | tee $logp/training_log.txt
-DEVICE          : cuda              # device used for training and evaluation (cpu, cuda, cuda0, cuda1, ...)
+DEVICE          : cpu              # device used for training and evaluation (cpu, cuda, cuda0, cuda1, ...)
 SAVE_DIR        : 'output'         # output folder name used for saving the model, logs and inference results
 
 MODEL:                                    
   NAME          : DeepWuKong                                        # name of the model you are using
   BACKBONE      :
   PARAMS:                                                   # model variant
+          gnn:
+              # gcn, ggnn
+              name: "gcn"
+              w2v_path: "/root/autodl-tmp/CWE119/w2v.wv"
+              embed_size: 256
+              hidden_size: 256
+              pooling_ratio: 0.8
+              drop_out: 0.5
+              n_hidden_layers: 3
+              n_head: 3
+              n_gru: 3
+              edge_sample_ratio: 0.8
+              rnn:
+                hidden_size: 256
+                num_layers: 1
+                drop_out: 0.5
+                use_bi: true
+                activation: relu
+          classifier:
+              hidden_size: 512
+              n_hidden_layers: 2
+              n_classes: 2
+              drop_out: 0.5
+
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
   NAME          : DWK_Dataset                                         # dataset name to be trained with (camvid, cityscapes, ade20k)
   ROOT          : 'data/ADEChallengeData2016'                         # dataset root path
+  dataloader    : 'geometric'
   PARAMS:
     args        :
-        XFG_paths_json: ''
-        w2v_path      : '${data_folder}/w2v.wv'
+        XFG_paths_json: '/root/autodl-tmp/CWE119/train.json'
+        w2v_path      : '/root/autodl-tmp/CWE119/w2v.wv'
         token_max_parts: 16
         
   PREPROCESS:

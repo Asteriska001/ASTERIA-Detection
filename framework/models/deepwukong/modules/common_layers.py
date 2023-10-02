@@ -48,13 +48,13 @@ class RNNLayer(torch.nn.Module):
         self.__pad_idx = pad_idx
         self.__config = config
         self.__rnn = nn.LSTM(
-            input_size=config.embed_size,
-            hidden_size=config.rnn.hidden_size,
-            num_layers=config.rnn.num_layers,
-            bidirectional=config.rnn.use_bi,
-            dropout=config.rnn.drop_out if config.rnn.num_layers > 1 else 0,
+            input_size=config['embed_size'],
+            hidden_size=config['rnn']['hidden_size'],
+            num_layers=config['rnn']['num_layers'],
+            bidirectional=config['rnn']['use_bi'],
+            dropout=config['rnn']['drop_out'] if config['rnn']['num_layers'] > 1 else 0,
             batch_first=True)
-        self.__dropout_rnn = nn.Dropout(config.rnn.drop_out)
+        self.__dropout_rnn = nn.Dropout(config['rnn']['drop_out'])
 
     def forward(self, subtokens_embed: torch.Tensor, node_ids: torch.Tensor):
         """
@@ -104,12 +104,12 @@ class STEncoder(torch.nn.Module):
         self.__config = config
         self.__pad_idx = pad_idx
         self.__wd_embedding = nn.Embedding(vocabulary_size,
-                                           config.embed_size,
+                                           config['embed_size'],
                                            padding_idx=pad_idx)
         # Additional embedding value for masked token
         torch.nn.init.xavier_uniform_(self.__wd_embedding.weight.data)
-        if exists(config.w2v_path):
-            self.__add_w2v_weights(config.w2v_path, vocab)
+        if exists(config['w2v_path']):
+            self.__add_w2v_weights(config['w2v_path'], vocab)
         self.__rnn_attn = RNNLayer(config, pad_idx)
 
     def __add_w2v_weights(self, w2v_path: str, vocab: Vocabulary):
