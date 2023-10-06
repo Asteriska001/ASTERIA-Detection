@@ -1,4 +1,4 @@
-# implementations/cpp_impl.py
+# implementations/llvm-ir_impl.py
 
 from CodeAnalysis.interfaces.base import CodeAnalyzerInterface
 

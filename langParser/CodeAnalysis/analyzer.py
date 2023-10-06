@@ -16,7 +16,7 @@ class CodeAnalyzerFactory:
             return c_impl.CAnalyzer()
         elif language == "cpp":
             return cpp_impl.CppAnalyzer()
-        elif language == "llvmir":
+        elif language == "llvmir":#llvm 15
             return llvm_impl.LLVMIRAnalyzer()
         # ... 其他语言
         else:
