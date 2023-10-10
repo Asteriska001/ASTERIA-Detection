@@ -43,7 +43,7 @@ class PythonAnalyzer(CodeAnalyzerInterface):
         source = program_utils.getsource(fn)
         control_flow_graphviz.render(graph, include_src=source, path=path)
 
-    def get_pdg(self, file_path: str) -> None:
+    def get_pg(self, file_path: str) -> None:
         # 实现Python的PDG分析
         module = self._load_module_from_file(file_path)
         os.makedirs('out', exist_ok=True)

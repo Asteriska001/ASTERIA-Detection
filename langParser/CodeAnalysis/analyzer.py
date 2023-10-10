@@ -1,6 +1,6 @@
 # analyzer.py
 
-from CodeAnalysis.implementations import python_impl, java_impl
+from CodeAnalysis.implementations import python_impl#, java_impl
 from CodeAnalysis.implementations import c_impl, cpp_impl
 from CodeAnalysis.implementations import llvm_ir_impl
 

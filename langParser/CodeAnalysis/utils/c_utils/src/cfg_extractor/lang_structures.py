@@ -1,8 +1,8 @@
 import networkx as nx
 
-from src.antlr.gen.CPP14_v2Parser import CPP14_v2Parser
-from src.antlr.rule_utils import is_break
-from src.graph.utils import (shift_node_labels,
+from CodeAnalysis.utils.c_utils.src.antlr.gen.CPP14_v2Parser import CPP14_v2Parser
+from CodeAnalysis.utils.c_utils.src.antlr.rule_utils import is_break
+from CodeAnalysis.utils.c_utils.src.graph.utils import (shift_node_labels,
                              head_node, last_node,
                              split_on_break, split_on_continue, split_on_return, split_on_throw,
                              compose, reorder_node_labels, solve_null_nodes)

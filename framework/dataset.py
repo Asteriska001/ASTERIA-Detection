@@ -68,7 +68,7 @@ def get_dataset(config, split):
         dataset = None
 
     return dataset
-
+'''
 from framework.datasets.XFGDataset_build import XFGSample,XFGBatch
 def graph_collate_fn(samples: List[XFGSample]) -> XFGBatch:
     
@@ -103,7 +103,7 @@ def graph_collate_fn(batch):
     labels = labels.squeeze(1)
 
     return data_list, labels
-'''
+
 
 def get_dataloader(config, split, dataset, batch_size, num_workers=1, **kw):
     if 'dataloader' in config and config['dataloader'] == 'geometric':

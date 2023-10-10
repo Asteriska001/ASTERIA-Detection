@@ -7,7 +7,6 @@ from antlr4 import CommonTokenStream, StdinStream, FileStream
 from CodeAnalysis.utils.c_utils.src.antlr.gen.CPP14_v2Lexer import CPP14_v2Lexer
 from CodeAnalysis.utils.c_utils.src.antlr.gen.CPP14_v2Parser import CPP14_v2Parser
 from CodeAnalysis.utils.c_utils.src.cfg_extractor.cfg_extractor_visitor import CFGExtractorVisitor
-from CodeAnalysis.utils.c_utils.src.cfg_extractor.data_dependency_visitor import DataDependencyVisitor
 from CodeAnalysis.utils.c_utils.src.code_coverage.prime_path_coverage import prime_path_coverage_bruteforce, prime_path_coverage_superset
 from CodeAnalysis.utils.c_utils.src.code_coverage.path_finder import prime_paths, simple_paths
 from CodeAnalysis.utils.c_utils.src.graph.utils import last_node, head_node

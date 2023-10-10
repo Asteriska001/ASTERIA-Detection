@@ -2,8 +2,8 @@ import html
 
 import graphviz as gv
 
-from src.antlr.rule_utils import extract_exact_text
-from src.graph.utils import head_node, last_node
+from CodeAnalysis.utils.c_utils.src.antlr.rule_utils import extract_exact_text
+from CodeAnalysis.utils.c_utils.src.graph.utils import head_node, last_node
 
 FONT_SIZE = "22"
 PEN_WIDTH = "2"

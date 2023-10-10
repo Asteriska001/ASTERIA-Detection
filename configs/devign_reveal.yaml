@@ -19,7 +19,7 @@ MODEL:
         feature_dim_size: 768
         hidden_size: 256
         num_GNN_layers: 2
-        model_name_or_path: microsoft/graphcodebert-base
+        model_name_or_path: "microsoft/graphcodebert-base"
         remove_residual: False
         att_op: 'mul'
         num_classes : 2
