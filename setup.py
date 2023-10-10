@@ -9,4 +9,22 @@ setup(
     author_email='asteriska001@gmail.com',
     license='MIT',
     packages=find_packages(),
+    install_requires=[
+    'pyyaml',
+    'tabulate'
+    'torch_geometric==2.1.0',
+    'scipy==1.7.0',
+    'omegaconf',
+    'pandas',
+    'networkx',
+    'gensim',
+    'torch-sparse==0.6.14',
+    'torch-scatter==2.1.1',
+    'cuml',
+    'antlr4-tools',
+    'antlr4-python3-runtime==4.13.1',
+    'tree_sitter',
+    'programl',
+    'dgl==0.6.1'
+]
 )
