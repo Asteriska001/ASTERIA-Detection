@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='astBugDetection',
-    version='0.4.1',
+    name='ASTERIA-Detection',
+    version='1.0.1',
     description='A framework consists of SOTA Vulnerability Detection Models and Datasets.',
-    url='https://github.com/Asteriska001/astBugDetection',
+    url='https://github.com/Asteriska001/ASTERIA-Detection',
     author='Asteriska001',
     author_email='asteriska001@gmail.com',
     license='MIT',
@@ -26,5 +26,5 @@ setup(
     'tree_sitter',
     'programl',
     'dgl==0.6.1'
-]
+    ]
 )
