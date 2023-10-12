@@ -14,8 +14,8 @@ MODEL:
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
-  NAME          : REVEAL                                         # dataset name to be trained with (camvid, cityscapes, ade20k)
-  ROOT          : 'data/ADEChallengeData2016'                         # dataset root path
+  NAME          : REVEAL                                         # dataset name to be trained
+  ROOT          : ''                         # dataset root path
   PARAMS:
     tokenizer   : 'roberta'
     args        :
@@ -60,8 +60,7 @@ SCHEDULER:
 
 EVAL:
   INPUT_SIZE    : 128
-  MODEL_PATH    : 'checkpoints/pretrained/segformer/segformer.b2.ade.pth'  # trained model file path
-  IMAGE_SIZE    : [512, 512]                                                            # evaluation image size in (h, w)                       
+  MODEL_PATH    : 'checkpoints/pretrained/vuln.pth'  # trained model file path
   MSF: 
     ENABLE      : false                                                                 # multi-scale and flip evaluation  
     FLIP        : true                                                                  # use flip in evaluation  
@@ -69,7 +68,7 @@ EVAL:
 
 
 TEST:
-  MODEL_PATH    : 'checkpoints/pretrained/segformer/segformer.b2.ade.pth'  # trained model file path
+  MODEL_PATH    : 'checkpoints/pretrained/vuln.pth'  # trained model file path
   FILE          : 'assests/ade'                                                         # filename or foldername 
-  IMAGE_SIZE    : [512, 512]                                                            # inference image size in (h, w)
-  OVERLAY       : true                                                                  # save the overlay result (image_alpha+label_alpha)
+  INPUT_SIZE    : 128                                                            # inference input size
+  OVERLAY       : true                                                                  # save the result
