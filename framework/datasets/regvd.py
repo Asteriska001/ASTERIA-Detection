@@ -34,7 +34,7 @@ def convert_examples_to_features(js,tokenizer,args):
     return InputFeatures(source_tokens,source_ids,js['idx'],js['target'])
 
 
-class REVEAL(Dataset):
+class ReGVD(Dataset):
     def __init__(self, root: str, split: str , tokenizer, preprocess_format, args):
             self.n_classes = 2
             #port dataset

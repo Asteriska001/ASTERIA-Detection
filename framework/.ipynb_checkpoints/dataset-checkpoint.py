@@ -15,7 +15,7 @@ from typing import List
 
 #手动构建字典
 DATASETS_DICT = {
-    'REVEAL': REVEAL,
+    'ReGVD': ReGVD,
     'Devign_Partial': Devign_Partial,
     'CodeXGLUE': CodeXGLUE,
     'DWK_Dataset': DWK_Dataset,

@@ -14,6 +14,7 @@ def get_ratio(dataset, ratio):
     return dataset[:approx_size]
 
 def load(path, pickle_file, ratio=1):
+    print("[+]"+pickle_file)
     dataset = pd.read_pickle(path + '/' + pickle_file)
     dataset.info(memory_usage='deep')
     if ratio < 1:
@@ -75,7 +76,7 @@ class Devign_Partial(Dataset):
 
         train_dataset,test_dataset,val_dataset = train_val_test_split(input_dataset, shuffle=True)
         print('train_dataset:')
-        print(train_dataset)
+        #print(train_dataset)
         if split == 'train':
             #train_dataset = DataLoader(train_dataset, batch_size=128, shuffle=True)
             self.dataset = train_dataset

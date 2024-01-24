@@ -31,7 +31,7 @@ DATASET:
   NAME          : Devign_Partial                                         # dataset name to be trained
   ROOT          : ''                         # dataset root path
   PARAMS:
-      input_path: './framework/datasets/devign_partial_data/input'
+      input_path: '/root/autodl-tmp/devign_partial_data/input'
   PREPROCESS:
     ENABLE      : False
     COMPOSE     : [ 
