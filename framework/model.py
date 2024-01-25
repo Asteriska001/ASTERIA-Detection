@@ -7,7 +7,7 @@ from framework.models import *
 MODEL_DICT = {
     'GNNReGVD': GNNReGVD,
     'Devign': Devign,
-    'LineVD': LineVD,
+    'LineVul': LineVul,
     'VulDeepecker': VulDeepecker,
     'CodeXGLUE': CodeXGLUE_baseline,
     'Russell': Russell,

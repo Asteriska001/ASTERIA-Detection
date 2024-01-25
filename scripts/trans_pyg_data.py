@@ -9,6 +9,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from torch_geometric.data import DataLoader
 
+
 def get_ratio(dataset, ratio):
     approx_size = int(len(dataset) * ratio)
     return dataset[:approx_size]
@@ -16,6 +17,7 @@ def get_ratio(dataset, ratio):
 def load(path, pickle_file, ratio=1):
     print("[+]"+pickle_file)
     dataset = pd.read_pickle(path + '/' + pickle_file)
+    #dataset = torch.load(path + '/' + pickle_file)
     print(dataset)
     #assert(1==0)
     dataset.info(memory_usage='deep')
@@ -108,3 +110,6 @@ class Devign_Partial(Dataset):
 
     #def get_loader(self, batch_size, shuffle=True):
     #    return DataLoader(dataset=self, batch_size=batch_size, shuffle=shuffle)
+    
+input_path = '/Users/asteriska/Asteriska/nwu/projects/ASTERIA-Detection/external/devign_partial_data/input'
+dp = Devign_Partial(split='train',root='',preprocess_format='', input_path=input_path)

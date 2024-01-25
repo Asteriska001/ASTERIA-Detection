@@ -1,6 +1,6 @@
 from .GNNReGVD import GNNReGVD
 from .Devign import Devign
-from .lineVD import LineVD
+from .LineVul import LineVul
 from .VulDeePecker import VulDeepecker
 from .CodeXGLUE_baseline import CodeXGLUE_baseline
 from .Russell_et_net import Russell
@@ -12,7 +12,7 @@ from .IVDetect.IVDetect_model import IVDmodel
 __all__ = [
     'GNNReGVD',
     'Devign',
-    'LineVD',
+    'LineVul',
     'VulDeepecker',
     'CodeXGLUE_baseline',
     'Russell',

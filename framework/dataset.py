@@ -87,20 +87,37 @@ def graph_collate_fn(samples: List[XFGSample]) -> XFGBatch:
 def graph_collate_fn(batch):
     # batch是一个列表，其中的元素是您的数据集__getitem__返回的数据
     # 例如：[(input_x1, label1), (input_x2, label2), ...]
-
+    #print('print graph collate batch')
+    #print(batch[0])
+    #(Data(edge_index=[2, 172], x=[205, 101], y=[1]), tensor(1))
     # 分解输入和标签
     input_xs = [item[0] for item in batch]
     labels = [item[1] for item in batch]
-
+    print(labels,type(labels))
     # 我们不能简单地堆叠input_xs，因为edge_index的大小是不同的
     # 所以我们将其保留为一个列表
     data_list = []
-    for data, edge_index in input_xs:
-        data_list.append(Data(my_data=data, edge_index=edge_index))
+    # try:
+    for input_x in input_xs:
+        edge_index, *remaining_data = input_x
+        # print(edge_index,type(edge_index))
+        # print(remaining_data, type(remaining_data))
+        # 检查 edge_index 是否为 torch.Tensor，如果不是，则将其转换为 torch.Tensor
+        #if not isinstance(edge_index, torch.Tensor):
+        #    edge_index = torch.tensor(edge_index, dtype=torch.long)
+        # 创建一个字典，其中 edge_index 是一个键，其余数据作为一个整体是另一个键
+        data_dict = {"edge_index": edge_index[1], "my_data": remaining_data}
+
+        # 将这个字典转换为 Data 对象
+        data_object = Data(**data_dict)
+        data_list.append(data_object)
+        #data_list.append(Data(my_data=data, edge_index=edge_index))
+    # except:
+    #     print(input_xs)
 
     # labels是一个简单的tensor列表，我们可以直接堆叠它们
     labels = torch.stack(labels, dim=0)
-    labels = labels.squeeze(1)
+    labels = labels.squeeze()
 
     return data_list, labels
 

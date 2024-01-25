@@ -113,6 +113,10 @@ class Devign(nn.Module):
     def forward(self, input_ids=None, labels=None):
         # construct graph
         if self.args.format == "uni":
+            # if isinstance(input_ids, list):
+            #     # Assuming input_ids is a list of tensors, you need to decide whether to use torch.cat or torch.stack
+            #     # This depends on how you want to merge these tensors
+            #     input_ids = torch.cat(input_ids, dim=0)  # or torch.stack(input_ids, dim=0)
             adj, x_feature = build_graph(input_ids.cpu().detach().numpy(), self.w_embeddings)
         else:
             adj, x_feature = build_graph_text(input_ids.cpu().detach().numpy(), self.w_embeddings)

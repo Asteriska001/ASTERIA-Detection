@@ -7,7 +7,7 @@ DEVICE          : cuda              # device used for training and evaluation (c
 SAVE_DIR        : 'output'         # output folder name used for saving the model, logs and inference results
 
 MODEL:                                    
-  NAME          : LineVD                                        # name of the model you are using
+  NAME          : LineVul                                        # name of the model you are using
   BACKBONE      :
   PARAMS:                                                   # model variant
     encoder       : 

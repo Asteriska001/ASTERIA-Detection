@@ -21,7 +21,7 @@ class RobertaClassificationHead(nn.Module):
         x = self.out_proj(x)
         return x
         
-class LineVD(RobertaForSequenceClassification):   
+class LineVul(RobertaForSequenceClassification):   
     def __init__(self, encoder, config, tokenizer, args):
         
         from types import SimpleNamespace
@@ -32,7 +32,7 @@ class LineVD(RobertaForSequenceClassification):
         config = config_class.from_pretrained(args.config_name if args.config_name else args.model_name_or_path,
                                              )#cache_dir=args.cache_dir if args.cache_dir else None)
         config.num_labels = 1
-        super(LineVD, self).__init__(config=config)
+        super(LineVul, self).__init__(config=config)
                 
         encoder = model_class.from_pretrained('microsoft/graphcodebert-base',#args.model_name_or_path,
                                             #from_tf=bool('.ckpt' in args.model_name_or_path),

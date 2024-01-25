@@ -71,7 +71,7 @@ Supported Models/Modules:
 - [LineVul](https://github.com/awsm-research/LineVul/blob/main/linevul/linevul_main.py)
 - VulDeePecker
 - IVDetect
-- LineVD
+- LineVul
 - ReGVD
 - DeepWuKong
 - TextCNN
