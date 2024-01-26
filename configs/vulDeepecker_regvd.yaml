@@ -28,15 +28,15 @@ MODEL:
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
-  NAME          : REVEAL                                         # dataset name to be trained
+  NAME          : ReGVD                                         # dataset name to be trained
   ROOT          : ''                         # dataset root path
   PARAMS:
     tokenizer   : 'roberta'
     args        :
-      train_data_file: '../dataset/train.jsonl'
-      eval_data_file : '../dataset/valid.jsonl'
-      test_data_file : '../dataset/test.jsonl'
-      block_size     : 400
+      train_data_file: '/root/autodl-fs/dataset/train.jsonl'
+      eval_data_file : '/root/autodl-fs/dataset/valid.jsonl'
+      test_data_file : '/root/autodl-fs/dataset/test.jsonl'
+      block_size     : 50
       training_percent: 1.0
   PREPROCESS:
     ENABLE      : False #True

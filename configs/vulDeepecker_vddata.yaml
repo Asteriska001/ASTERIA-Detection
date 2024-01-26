@@ -3,7 +3,7 @@
 #	--block_size 400 --train_batch_size 128 --eval_batch_size 128 --max_grad_norm 1.0 --evaluate_during_training \
 #	--gnn ReGCN --learning_rate 5e-4 --epoch 100 --hidden_size 128 --num_GNN_layers 2 --format uni --window_size 5 \
 #	--seed 123456 2>&1 | tee $logp/training_log.txt
-DEVICE          : cpu              # device used for training and evaluation (cpu, cuda, cuda0, cuda1, ...)
+DEVICE          : cuda              # device used for training and evaluation (cpu, cuda, cuda0, cuda1, ...)
 SAVE_DIR        : 'output'         # output folder name used for saving the model, logs and inference results
 
 MODEL:                                    
@@ -33,9 +33,9 @@ DATASET:
   PARAMS:
     tokenizer   : 'roberta'
     args        :
-      train_data_file: '/Users/asteriska/Asteriska/nwu/projects/ASTERIA-Detection/external/VDPython/cwe119_cgd.txt'
-      eval_data_file : '/Users/asteriska/Asteriska/nwu/projects/ASTERIA-Detection/external/VDPython/cwe119_cgd.txt'
-      test_data_file : '/Users/asteriska/Asteriska/nwu/projects/ASTERIA-Detection/external/VDPython/cwe119_cgd.txt'
+      train_data_file: '/root/autodl-tmp/cwe119_cgd.txt'
+      eval_data_file : '/root/autodl-tmp/cwe119_cgd.txt'
+      test_data_file : '/root/autodl-tmp/cwe119_cgd.txt'
       block_size     : 400
       training_percent: 1.0
   PREPROCESS:

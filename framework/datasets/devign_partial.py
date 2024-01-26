@@ -14,10 +14,7 @@ def get_ratio(dataset, ratio):
     return dataset[:approx_size]
 
 def load(path, pickle_file, ratio=1):
-    print("[+]"+pickle_file)
     dataset = pd.read_pickle(path + '/' + pickle_file)
-    print(dataset)
-    #assert(1==0)
     dataset.info(memory_usage='deep')
     if ratio < 1:
         dataset = get_ratio(dataset, ratio)
@@ -77,8 +74,6 @@ class Devign_Partial(Dataset):
         assert split in ['train', 'val', 'test']
 
         train_dataset,test_dataset,val_dataset = train_val_test_split(input_dataset, shuffle=True)
-        print('train_dataset:')
-        #print(train_dataset)
         if split == 'train':
             #train_dataset = DataLoader(train_dataset, batch_size=128, shuffle=True)
             self.dataset = train_dataset
@@ -97,14 +92,10 @@ class Devign_Partial(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, index):
-        #assert(1==0)
-        
-        input_x = self.dataset.iloc[index].input
-        print(input_x)
-        #input_x = torch.tensor(self.dataset.iloc[index].input)
+        #print('__getitem__  input_x: ',self.dataset.iloc[index].input)
+        input_x = self.dataset.iloc[index].input.x
         label = torch.tensor(self.dataset.iloc[index].target)
         return input_x, label
-        #return self.dataset.iloc[index].input
 
     #def get_loader(self, batch_size, shuffle=True):
     #    return DataLoader(dataset=self, batch_size=batch_size, shuffle=shuffle)

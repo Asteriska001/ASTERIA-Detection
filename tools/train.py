@@ -112,10 +112,35 @@ def main(cfg, gpu, save_dir):
             
             optimizer.zero_grad(set_to_none=True)
 
-            #input_x = tuple(torch.tensor(item).to(device) if isinstance(item, list) else item.to(device) for item in input_x)#tuple(tensor.to(device) for tensor in input_x)#input_x.to(device)
+            #input_x = tuple(torch.tensor(item).to(device) if isinstance(item, list) else item.to(device) for item in input_x)
+            #tuple(tensor.to(device) for tensor in input_x)
+            try:
+                input_x = input_x.to(device)
+                #input_x = [torch.tensor(x).to(device) for x in input_x]#input_x.to(device)
+                # input_x_transformed = []
+                # for x in input_x:
+                #     if isinstance(x, torch.Tensor):
+                #         # 对于 PyTorch 张量，直接转移到设备
+                #         x_transformed = x.to(device)
+                #     elif isinstance(x, Data):
+                #         # 对于 PyTorch Geometric 的 Data 对象，也直接转移到设备
+                #         x_transformed = x.to(device)
+                #     else:
+                #         # 对于其他类型，根据需要进行处理
+                #         # 例如，如果是 NumPy 数组，先转换为张量，然后转移到设备
+                #         x_transformed = torch.tensor(x).to(device)
+                #     input_x_transformed.append(x_transformed)
+                # input_x = torch.tensor(input_x_transformed).to(device)
+            except:
+                print('Error in the inputx to device:')
+                for x in input_x:
+                    print(x,type(x))
             lbl = lbl.to(device)
             #print('input shape: '+str(input_x))
             with autocast(enabled=train_cfg['AMP']):
+                # print(model.device)
+                # print(input_x.device)
+                # print(lbl.device)
                 logits = model(input_x)
                 #data, edge_index = input_x
                 #edge_index_list = [data.edge_index for data in input_x]
@@ -143,7 +168,7 @@ def main(cfg, gpu, save_dir):
         #eval_interval 
         if (epoch+1) % train_cfg['EVAL_INTERVAL'] == 0 or (epoch+1) == epochs:
             print('eval_interval:')
-            acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)#[-1]
+            acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)
             writer.add_scalar('val/acc', acc, epoch)
             if acc > best_Acc:
                 best_Acc = acc

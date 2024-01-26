@@ -16,7 +16,10 @@ class Russell(nn.Module):
         self.maxpool = nn.MaxPool1d(kernel_size=5)
 
         # Fully connected layers
-        self.fc1 = nn.Linear(512 * (INPUT_SIZE // 5), 64)  # you might need to adjust the input size
+        print('INPUT_SIZE: ',INPUT_SIZE)
+        conv_output_size = INPUT_SIZE // 5
+        self.fc1 = nn.Linear(512 * conv_output_size, 64)
+        #self.fc1 = nn.Linear(512 * (INPUT_SIZE // 5), 64)  # you might need to adjust the input size
         self.fc2 = nn.Linear(64, 16)
         self.fc3 = nn.Linear(16, 1)
         

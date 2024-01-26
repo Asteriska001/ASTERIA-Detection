@@ -212,6 +212,8 @@ print('using default unweighted graph')
 # build graph function
 def build_graph(shuffle_doc_words_list, word_embeddings, window_size=3):
     # print('using window size = ', window_size)
+    print('shuffle_doc_words_list: ',shuffle_doc_words_list)
+    print('shuffle_doc_words_list shape: ',shuffle_doc_words_list.shape)
     x_adj = []
     x_feature = []
     y = []

@@ -1,28 +1,36 @@
-#--output_dir=./saved_models/regcn_l2_hs128_uni_ws5_lr5e4 --model_type=roberta --tokenizer_name=microsoft/graphcodebert-base --model_name_or_path=microsoft/graphcodebert-base \
-#	--do_eval --do_test --do_train --train_data_file=../dataset/train.jsonl --eval_data_file=../dataset/valid.jsonl --test_data_file=../dataset/test.jsonl \
-#	--block_size 400 --train_batch_size 128 --eval_batch_size 128 --max_grad_norm 1.0 --evaluate_during_training \
-#	--gnn ReGCN --learning_rate 5e-4 --epoch 100 --hidden_size 128 --num_GNN_layers 2 --format uni --window_size 5 \
-#	--seed 123456 2>&1 | tee $logp/training_log.txt
-DEVICE          : cuda              # device used for training and evaluation (cpu, cuda, cuda0, cuda1, ...)
+DEVICE          : cpu              # device used for training and evaluation (cpu, cuda, cuda0, cuda1, ...)
 SAVE_DIR        : 'output'         # output folder name used for saving the model, logs and inference results
 
 MODEL:                                    
-  NAME          : Russell                                       # name of the model you are using
+  NAME          : Devign                                        # name of the model you are using
   BACKBONE      :
   PARAMS:                                                   # model variant
-    WORDS_SIZE  : 50000
-    INPUT_SIZE  : 8
+    encoder       : 
+    config        :
+    tokenizer     : 'roberta'
+    args          :
+        config_name : ''
+        gnn     : 'ReGGNN'
+        feature_dim_size: 768
+        hidden_size: 256
+        num_GNN_layers: 2
+        model_name_or_path: "microsoft/graphcodebert-base"
+        remove_residual: False
+        att_op: 'mul'
+        num_classes : 2
+        format: 'uni'
+        window_size: 5
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
-  NAME          : REVEAL                                         # dataset name to be trained
+  NAME          : ReGVD                                         # dataset name to be trained
   ROOT          : ''                         # dataset root path
   PARAMS:
     tokenizer   : 'roberta'
     args        :
-      train_data_file: '../dataset/train.jsonl'
-      eval_data_file : '../dataset/valid.jsonl'
-      test_data_file : '../dataset/test.jsonl'
+      train_data_file: '/root/autodl-fs/dataset/train.jsonl'
+      eval_data_file : '/root/autodl-fs/dataset/valid.jsonl'
+      test_data_file : '/root/autodl-fs/dataset/test.jsonl'
       block_size     : 400
       training_percent: 1.0
   PREPROCESS:
@@ -36,9 +44,9 @@ DATASET:
 
 
 TRAIN:
-  INPUT_SIZE    : 64
-  BATCH_SIZE    : 8               # batch size used to train
-  EPOCHS        : 10             # number of epochs to train
+  INPUT_SIZE    : 128
+  BATCH_SIZE    : 128               # batch size used to train
+  EPOCHS        : 20             # number of epochs to train
   EVAL_INTERVAL : 50              # evaluation interval during training
   AMP           : false           # use AMP in training
   DDP           : false           # use DDP training
@@ -60,8 +68,8 @@ SCHEDULER:
   
 
 EVAL:
-  INPUT_SIZE    : 64
-  MODEL_PATH    : 'checkpoints/pretrained/vuln.pth'  # trained model file path
+  INPUT_SIZE    : 128
+  MODEL_PATH    : 'checkpoints/pretrained/a.pth'  # trained model file path
   MSF: 
     ENABLE      : false                                                                 # multi-scale and flip evaluation  
     FLIP        : true                                                                  # use flip in evaluation  
@@ -69,7 +77,7 @@ EVAL:
 
 
 TEST:
-  MODEL_PATH    : 'checkpoints/pretrained/vuln.pth'  # trained model file path
+  MODEL_PATH    : 'checkpoints/pretrained/a.pth'  # trained model file path
   FILE          : 'assests/ade'                                                         # filename or foldername 
   INPUT_SIZE    : 128                                                            # inference input size
   OVERLAY       : true                                                                  # save the result

@@ -40,7 +40,7 @@ class VulDeepecker(nn.Module):
         self.fc3 = nn.Linear(300, 2)
     
     def forward(self, x):
-        print('vuldeepcker input shape:', x.shape)
+        # print('vuldeepcker input shape:', x.shape)
         x = x.float()
         #input_x = x.unsqueeze(1).float()
         x, _ = self.lstm(x)
