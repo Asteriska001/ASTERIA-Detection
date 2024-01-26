@@ -129,7 +129,7 @@ class GadgetVectorizer:
     """
     def train_model(self):
         # Set min_count to 1 to prevent out-of-vocabulary errors
-        model = Word2Vec(self.gadgets, min_count=1, size=self.vector_length, sg=1)
+        model = Word2Vec(self.gadgets, min_count=1, vector_size=self.vector_length, sg=1)
         self.embeddings = model.wv
         del model
         del self.gadgets

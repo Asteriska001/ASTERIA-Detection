@@ -29,7 +29,7 @@ class VulDeepecker(nn.Module):
         self.y_test = torch.tensor(y_test, dtype=torch.float32)
         '''
         
-        self.lstm = nn.LSTM(input_size= 400,#vectors.shape[2], 
+        self.lstm = nn.LSTM(input_size= 50,#400,vectors.shape[2], 
                             hidden_size=300, 
                             batch_first=True, 
                             bidirectional=True)
@@ -40,8 +40,10 @@ class VulDeepecker(nn.Module):
         self.fc3 = nn.Linear(300, 2)
     
     def forward(self, x):
-        input_x = x.unsqueeze(1).float()
-        x, _ = self.lstm(input_x)
+        print('vuldeepcker input shape:', x.shape)
+        x = x.float()
+        #input_x = x.unsqueeze(1).float()
+        x, _ = self.lstm(x)
         x = x[:, -1, :] # 选择最后一个时间步长的输出
         x = F.leaky_relu(self.fc1(x))
         x = self.dropout1(x)

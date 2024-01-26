@@ -19,7 +19,9 @@ DATASETS_DICT = {
     'Devign_Partial': Devign_Partial,
     'CodeXGLUE': CodeXGLUE,
     'DWK_Dataset': DWK_Dataset,
-    'IVDDataset': IVDetectDataset
+    'IVDDataset': IVDetectDataset,
+    'LineVul': LineVul,
+    'VDdata': VDdata
 }
 
 
@@ -35,9 +37,9 @@ def get_dataset(config, split):
     dataset_name = dataset_cfg['NAME']  # 这个应该是从配置文件中读取的模型名称
     dataset_param = dataset_cfg['PARAMS']  # 这个应该是从配置文件中读取的模型参数
     #待测试 不知道能不能直接把model——param的字典转为参数传递
-    print(dataset_name)
-    print(dataset_param)
-    print(DATASETS_DICT)
+    # print(dataset_name)
+    # print(dataset_param)
+    # print(DATASETS_DICT)
     if dataset_name in DATASETS_DICT:
         
         #preprocess dataset
@@ -65,6 +67,7 @@ def get_dataset(config, split):
                                               )
     else:
         print("The dataset name {} does not exist".format(dataset_name))
+        exit()
         dataset = None
 
     return dataset

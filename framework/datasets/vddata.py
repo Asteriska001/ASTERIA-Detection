@@ -11,6 +11,9 @@ import pandas
 from .vddata_utils.clean_gadget import clean_gadget
 from .vddata_utils.vectorize_gadget import GadgetVectorizer
 
+from framework.models.modules.transformers.transformers import *
+
+
 """
 Parses gadget file to find individual gadgets
 Yields each gadget as list of strings, where each element is code line
@@ -104,6 +107,8 @@ class VDdata(Dataset):
             else:
                 df = get_vectors_df(file_path, vector_length)
                 df.to_pickle(vector_filename)
+            self.dataset = df
+            #print('self dataset:\n',self.dataset)
             
             sample_percent = args.training_percent if args.training_percent else 1.0
 
@@ -115,20 +120,20 @@ class VDdata(Dataset):
             #preprocess
             self.preprocess = preprocess_format
 
-            self.examples = []
-            with open(file_path) as f:
-                for line in f:
-                    js=json.loads(line.strip())
-                    self.examples.append(convert_examples_to_features(js, tokenizer, args))
+            # self.examples = []
+            # # with open(file_path) as f:
+            # #     for line in f:
+            # #         js=json.loads(line.strip())
+            # #         self.examples.append(convert_examples_to_features(js, tokenizer, args))
 
-            total_len = len(self.examples)
-            num_keep = int(sample_percent * total_len)
+            # total_len = len(self.examples)
+            # num_keep = int(sample_percent * total_len)
 
-            if num_keep < total_len:
-                np.random.seed(10)
-                np.random.shuffle(self.examples)
-                self.examples = self.examples[:num_keep]
-                '''logger 待处理
+            # if num_keep < total_len:
+            #     np.random.seed(10)
+            #     np.random.shuffle(self.examples)
+            #     self.examples = self.examples[:num_keep]
+            '''logger 待处理
             if 'train' in file_path:
                 logger.info("*** Total Sample ***")
                 logger.info("\tTotal: {}\tselected: {}\tpercent: {}\t".format(total_len, num_keep, sample_percent))
@@ -139,21 +144,29 @@ class VDdata(Dataset):
                         logger.info("label: {}".format(example.label))
                         logger.info("input_tokens: {}".format([x.replace('\u0120','_') for x in example.input_tokens]))
                         logger.info("input_ids: {}".format(' '.join(map(str, example.input_ids))))
-                '''
+            '''
+            
     def __len__(self):
-        return len(self.examples)
+        print('length of dataset:'+str(len(self.dataset)))
+        return len(self.dataset)
 
-    def __getitem__(self, i):
-        input_x = torch.tensor(self.examples[i].input_ids)
-        label = torch.tensor(self.examples[i].label)
-
-        if self.preprocess:
-            #print("former data:")
-            #print(input_x.shape)
-            #print(label)
-            input_x, label = self.preprocess(input_x, label)       
-            #print("preprocessed data:")
-            #print(input_x.shape)
-            #print(label)
-            #assert 0 == 1
+    def __getitem__(self, index):
+        #print('_getitem_',self.dataset.iloc[index])
+        input_x = self.dataset.iloc[index].vector
+        # print('inputx shape:',input_x.shape)
+        #input_x = torch.tensor(self.dataset.iloc[index].input)
+        label = torch.tensor(self.dataset.iloc[index].val)
         return input_x, label
+        # input_x = torch.tensor(self.examples[i].input_ids)
+        # label = torch.tensor(self.examples[i].label)
+
+        # if self.preprocess:
+        #     #print("former data:")
+        #     #print(input_x.shape)
+        #     #print(label)
+        #     input_x, label = self.preprocess(input_x, label)       
+        #     #print("preprocessed data:")
+        #     #print(input_x.shape)
+        #     #print(label)
+        #     #assert 0 == 1
+        # return input_x, label
