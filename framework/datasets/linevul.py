@@ -6,6 +6,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 import json
+from tqdm import tqdm
 
 from framework.models.modules.transformers.transformers import *
 
