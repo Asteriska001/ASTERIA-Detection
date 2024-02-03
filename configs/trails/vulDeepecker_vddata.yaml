@@ -7,7 +7,7 @@ DEVICE          : cuda              # device used for training and evaluation (c
 SAVE_DIR        : 'output'         # output folder name used for saving the model, logs and inference results
 
 MODEL:                                    
-  NAME          : Devign                                        # name of the model you are using
+  NAME          : VulDeepecker                                      # name of the model you are using
   BACKBONE      :
   PARAMS:                                                   # model variant
     encoder       : 
@@ -28,13 +28,18 @@ MODEL:
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
-  NAME          : Devign_Partial                                         # dataset name to be trained
+  NAME          : VDdata                                         # dataset name to be trained
   ROOT          : ''                         # dataset root path
-#  dataloader    : 'geometric'
   PARAMS:
-      input_path: '/root/autodl-tmp/devign_partial_data/input'
+    tokenizer   : 'roberta'
+    args        :
+      train_data_file: '/root/autodl-tmp/cwe119_cgd.txt'
+      eval_data_file : '/root/autodl-tmp/cwe119_cgd.txt'
+      test_data_file : '/root/autodl-tmp/cwe119_cgd.txt'
+      block_size     : 400
+      training_percent: 1.0
   PREPROCESS:
-    ENABLE      : False
+    ENABLE      : False #True
     COMPOSE     : [ 
                 "Normalize",
                 "PadSequence",
@@ -45,9 +50,9 @@ DATASET:
 
 TRAIN:
   INPUT_SIZE    : 128
-  BATCH_SIZE    : 8               # batch size used to train
-  EPOCHS        : 50             # number of epochs to train
-  EVAL_INTERVAL : 50              # evaluation interval during training
+  BATCH_SIZE    : 64               # batch size used to train
+  EPOCHS        : 10             # number of epochs to train
+  EVAL_INTERVAL : 1              # evaluation interval during training
   AMP           : false           # use AMP in training
   DDP           : false           # use DDP training
 
@@ -63,14 +68,13 @@ OPTIMIZER:
 SCHEDULER:
   NAME          : warmuppolylr    # scheduler name
   POWER         : 0.9             # scheduler power
-  WARMUP        : 1              # warmup epochs used in scheduler
+  WARMUP        : 0              # warmup epochs used in scheduler
   WARMUP_RATIO  : 0.1             # warmup ratio
   
 
 EVAL:
   INPUT_SIZE    : 128
   MODEL_PATH    : 'checkpoints/pretrained/vuln.pth'  # trained model file path
-  INPUT_SIZE    : 128                                                            # evaluation image size in (h, w)                       
   MSF: 
     ENABLE      : false                                                                 # multi-scale and flip evaluation  
     FLIP        : true                                                                  # use flip in evaluation  

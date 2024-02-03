@@ -29,6 +29,28 @@ from val import evaluate
 #ordered load yaml files
 from collections import OrderedDict
 
+def get_max_cuda_memory() -> int:
+    """Returns the maximum GPU memory occupied by tensors in megabytes (MB) for
+    a given device. By default, this returns the peak allocated memory since
+    the beginning of this program.
+
+    Args:
+        device (torch.device, optional): selected device. Returns
+            statistic for the current device, given by
+            :func:`~torch.cuda.current_device`, if ``device`` is None.
+            Defaults to None.
+
+    Returns:
+        int: The maximum GPU memory occupied by tensors in megabytes
+        for a given device.
+    """
+    mem = torch.cuda.max_memory_allocated(device='cuda')
+    mem_mb = torch.tensor([int(mem) // (1024 * 1024)],
+                          dtype=torch.int,
+                          device='cuda')
+    torch.cuda.reset_peak_memory_stats()
+    return int(mem_mb.item())
+
 def ordered_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
     class OrderedLoader(Loader):
         pass
@@ -79,8 +101,6 @@ def main(cfg, gpu, save_dir):
     else:
         sampler = RandomSampler(trainset)
     
-    #trainloader = DataLoader(trainset, collate_fn = custom_collate_fn, batch_size=train_cfg['BATCH_SIZE'], num_workers=num_workers, drop_last=True, pin_memory=False, sampler=sampler)
-    #valloader = DataLoader(valset, collate_fn=custom_collate_fn, batch_size=1, num_workers=1, pin_memory=True)
     trainloader = get_dataloader(dataset_cfg, 'train', trainset, batch_size=train_cfg['BATCH_SIZE'], num_workers=num_workers, sampler=sampler)
     valloader = get_dataloader(dataset_cfg, 'val', valset, batch_size=1, num_workers=1)
 
@@ -93,64 +113,43 @@ def main(cfg, gpu, save_dir):
     scaler = GradScaler(enabled=train_cfg['AMP'])
     writer = SummaryWriter(str(save_dir / 'logs'))
 
-    for epoch in range(epochs):
-        model.train()
-        if train_cfg['DDP']: sampler.set_epoch(epoch)
+    #for epoch in range(epochs):
+    
+    model.train()
+    if train_cfg['DDP']: sampler.set_epoch(epoch)
 
-        train_loss = 0.0
-        pbar = tqdm(enumerate(trainloader), total=iters_per_epoch, desc=f"Epoch: [{epoch+1}/{epochs}] Iter: [{0}/{iters_per_epoch}] LR: {lr:.8f} Loss: {train_loss:.8f}")
+    train_loss = 0.0
+    nb_eval_steps = 0
+    warmup_steps = 5
+    total_steps = 2100
+    exit_flag = False
+
+    pure_inf_time = 0
+    
+    while True:
+        pbar = tqdm(enumerate(trainloader), total=iters_per_epoch, desc='')#f"Epoch: [{epoch+1}/{epochs}] Iter: [{0}/{iters_per_epoch}] LR: {lr:.8f} Loss: {train_loss:.8f}")
         for iter, data in pbar:
-        #for iter, (input_x, lbl) in pbar:
-            #print('pbar data')
-            #print(data)
-            #input_x = data.graphs
-            #lbl = data.labels
             (input_x,lbl) = data
-            #print('input_x data')
-            #print(input_x)
-            #print("train max input:", torch.max(input_x[0]))
-            
             optimizer.zero_grad(set_to_none=True)
 
-            #input_x = tuple(torch.tensor(item).to(device) if isinstance(item, list) else item.to(device) for item in input_x)
-            #tuple(tensor.to(device) for tensor in input_x)
             try:
                 input_x = input_x.to(device)
-                #input_x = [torch.tensor(x).to(device) for x in input_x]#input_x.to(device)
-                # input_x_transformed = []
-                # for x in input_x:
-                #     if isinstance(x, torch.Tensor):
-                #         # 对于 PyTorch 张量，直接转移到设备
-                #         x_transformed = x.to(device)
-                #     elif isinstance(x, Data):
-                #         # 对于 PyTorch Geometric 的 Data 对象，也直接转移到设备
-                #         x_transformed = x.to(device)
-                #     else:
-                #         # 对于其他类型，根据需要进行处理
-                #         # 例如，如果是 NumPy 数组，先转换为张量，然后转移到设备
-                #         x_transformed = torch.tensor(x).to(device)
-                #     input_x_transformed.append(x_transformed)
-                # input_x = torch.tensor(input_x_transformed).to(device)
             except:
-                pass
-                # print('Error in the inputx to device:')
-                # for x in input_x:
-                #     print(x,type(x))
+                print('Error in the inputx to device:')
+                for x in input_x:
+                    print(x,type(x))
             lbl = lbl.to(device)
-            #print('input shape: '+str(input_x))
+            
+            nb_eval_steps += 1
+            
             with autocast(enabled=train_cfg['AMP']):
-                # print(model.device)
-                # print(input_x.device)
-                # print(lbl.device)
+                torch.cuda.synchronize()
+                start_time = time.perf_counter()
                 logits = model(input_x)
-                #data, edge_index = input_x
-                #edge_index_list = [data.edge_index for data in input_x]
-                #my_data_list = [data.my_data for data in input_x]
-                #logits = model(my_data_list, edge_index_list)
-                #print(logits.shape)
-                #print(lbl.shape)
+                torch.cuda.synchronize()
+                elapsed = time.perf_counter() - start_time
                 loss = loss_fn(logits, lbl)
-
+            
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
@@ -161,29 +160,45 @@ def main(cfg, gpu, save_dir):
             lr = sum(lr) / len(lr)
             train_loss += loss.item()
 
-            pbar.set_description(f"Epoch: [{epoch+1}/{epochs}] Iter: [{iter+1}/{iters_per_epoch}] LR: {lr:.8f} Loss: {train_loss / (iter+1):.8f}")
-        
-        train_loss /= iter+1
-        writer.add_scalar('train/loss', train_loss, epoch)
-        torch.cuda.empty_cache()
-        #eval_interval 
-        if (epoch+1) % train_cfg['EVAL_INTERVAL'] == 0 or (epoch+1) == epochs:
-            print('eval_interval:')
-            acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)
-            writer.add_scalar('val/acc', acc, epoch)
-            if acc > best_Acc:
-                best_Acc = acc
-                torch.save(model.module.state_dict() if train_cfg['DDP'] else model.state_dict(), save_dir / f"{model_cfg['NAME']}_{model_cfg['BACKBONE']}_{dataset_cfg['NAME']}.pth")
-            print(f"Current Accuracy: {acc} Best Accuracy: {best_Acc}")
+            #pbar.set_description(f"Epoch: [{epoch+1}/{epochs}] Iter: [{iter+1}/{iters_per_epoch}] LR: {lr:.8f} Loss: {train_loss / (iter+1):.8f}")
+            
+            if nb_eval_steps >= warmup_steps:
+                pure_inf_time += elapsed
+            if nb_eval_steps==total_steps+warmup_steps:
+                fps = total_steps/ pure_inf_time
+                print(
+                f'Overall fps: {fps:.1f} data / s')
+                print('Train infer',pure_inf_time/total_steps)
+                
+                cuda_memory = get_max_cuda_memory()
+                print(f'Cuda memory: {cuda_memory} MB')
+                print(f'Cuda memory: {cuda_memory/1024}G')
+                exit_flag= True
+                break
+        if exit_flag: 
+            break
 
-    writer.close()
-    pbar.close()
-    end = time.gmtime(time.time() - start)
-    table = [
-        ['Best Acc', f"{best_Acc:.2f}"],
-        ['Total Training Time', time.strftime("%H:%M:%S", end)]
-    ]
-    print(tabulate(table, numalign='right'))
+        train_loss /= iter+1
+        #writer.add_scalar('train/loss', train_loss, epoch)
+        torch.cuda.empty_cache()
+        # #eval_interval 
+        # if (epoch+1) % train_cfg['EVAL_INTERVAL'] == 0 or (epoch+1) == epochs:
+        #     print('eval_interval:')
+        #     acc, f1, rec, prec, roc_auc, pr_auc = evaluate(model, valloader, device)
+        #     writer.add_scalar('val/acc', acc, epoch)
+        #     if acc > best_Acc:
+        #         best_Acc = acc
+        #         torch.save(model.module.state_dict() if train_cfg['DDP'] else model.state_dict(), save_dir / f"{model_cfg['NAME']}_{model_cfg['BACKBONE']}_{dataset_cfg['NAME']}.pth")
+        #     print(f"Current Accuracy: {acc} Best Accuracy: {best_Acc}")
+
+    # writer.close()
+    # pbar.close()
+    # end = time.gmtime(time.time() - start)
+    # table = [
+    #     ['Best Acc', f"{best_Acc:.2f}"],
+    #     ['Total Training Time', time.strftime("%H:%M:%S", end)]
+    # ]
+    # print(tabulate(table, numalign='right'))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -193,8 +208,6 @@ if __name__ == '__main__':
     with open(args.cfg) as f:
         ordered_dict = ordered_load(f, yaml.SafeLoader)
         cfg = ordered_dict
-    #with open(args.cfg) as f:
-    #    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
     fix_seeds(3407)
     setup_cudnn()

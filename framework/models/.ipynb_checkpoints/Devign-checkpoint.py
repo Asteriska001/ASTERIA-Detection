@@ -120,8 +120,8 @@ class Devign(nn.Module):
             # print('mydata: ', input_ids[0].my_data)
             # input_ids = [data.my_data for data in input_ids]
             #input_ids = torch.stack(input_ids, dim=0)  # or torch.stack(input_ids, dim=0)
-            input_ids = input_ids.squeeze()
-            adj, x_feature = build_graph(input_ids, self.w_embeddings)
+            #input_ids = input_ids.squeeze()
+            adj, x_feature = build_graph(input_ids.cpu().detach().numpy(), self.w_embeddings)
         else:
             adj, x_feature = build_graph_text(input_ids.cpu().detach().numpy(), self.w_embeddings)
         # initilization

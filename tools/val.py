@@ -15,10 +15,9 @@ from framework.utils.utils import setup_cudnn
 from framework.dataset import get_dataset
 from framework.model import get_model
 
-'''
-from semseg.augmentations import get_val_augmentation
-'''
-
+def convert_output(pred):
+    # 将一维预测转换为二维
+    return torch.stack([1 - pred, pred], dim=1)
 
 @torch.no_grad()
 def evaluate(model, dataloader, device):
@@ -27,8 +26,12 @@ def evaluate(model, dataloader, device):
     metrics = Metrics(dataloader.dataset.n_classes, device)
     for input_x, labels in tqdm(dataloader):
         input_x = input_x.to(device)
-        labels = labels.to(device)
         preds = model(input_x).to(device)
+        #preds = convert_output(preds)
+        labels = torch.tensor([labels])
+        labels = labels.to(device)
+        # print('preds value and shape: ',preds,preds.shape)
+        # print('labels value and shape: ',labels, labels.shape)
         metrics.update(preds, labels)
     
     acc = metrics.compute_acc()

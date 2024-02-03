@@ -2,8 +2,11 @@ import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
 
-__all__ = ['CrossEntropy', 'MSELoss', 'BCELoss', 'NLLLoss', 'KLDivLoss', 'HingeLoss', 'SmoothL1Loss']
+__all__ = ['BinaryCrossEntropy','CrossEntropy', 'MSELoss', 'BCELoss', 'NLLLoss', 'KLDivLoss', 'HingeLoss', 'SmoothL1Loss']
 
+class BinaryCrossEntropy(nn.Module):
+    def forward(self, input: Tensor, target: Tensor):
+        return F.binary_cross_entropy(input, target)
 
 class CrossEntropy(nn.Module):
     def forward(self, input: Tensor, target: Tensor):

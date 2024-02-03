@@ -96,7 +96,7 @@ def graph_collate_fn(batch):
     # 分解输入和标签
     input_xs = [item[0] for item in batch]
     labels = [item[1] for item in batch]
-    print(labels,type(labels))
+    #print(labels,type(labels))
     # 我们不能简单地堆叠input_xs，因为edge_index的大小是不同的
     # 所以我们将其保留为一个列表
     data_list = []

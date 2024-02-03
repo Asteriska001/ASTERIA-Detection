@@ -7,30 +7,42 @@ DEVICE          : cuda              # device used for training and evaluation (c
 SAVE_DIR        : 'output'         # output folder name used for saving the model, logs and inference results
 
 MODEL:                                    
-  NAME          : Devign                                        # name of the model you are using
+  NAME          : Devign                                    # name of the model you are using
   BACKBONE      :
   PARAMS:                                                   # model variant
-    encoder       : 
+    encoder       :
     config        :
-    tokenizer     : 'roberta'
+    tokenizer     :
     args          :
-        config_name : ''
-        gnn     : 'ReGGNN'
-        feature_dim_size: 768
-        hidden_size: 256
-        num_GNN_layers: 2
-        model_name_or_path: microsoft/graphcodebert-base
-        remove_residual: False
-        att_op: 'mul'
-        num_classes : 2
-        format: 'uni'
-        window_size: 5
+        gated_graph_conv_args:
+          out_channels: 200
+          num_layers: 6
+          aggr: 'add'
+          bias: true
+        conv_args:
+          conv1d_1:
+            in_channels: 205
+            out_channels: 50
+            kernel_size: 3
+            padding: 1
+          conv1d_2:
+            in_channels: 50
+            out_channels: 20
+            kernel_size: 1
+            padding: 1
+          maxpool1d_1:
+            kernel_size: 3
+            stride: 2
+          maxpool1d_2:
+            kernel_size: 2
+            stride: 2
+        emb_size: 101
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
   NAME          : Devign_Partial                                         # dataset name to be trained
   ROOT          : ''                         # dataset root path
-#  dataloader    : 'geometric'
+  dataloader    : 'geometric'
   PARAMS:
       input_path: '/root/autodl-tmp/devign_partial_data/input'
   PREPROCESS:
@@ -46,13 +58,13 @@ DATASET:
 TRAIN:
   INPUT_SIZE    : 128
   BATCH_SIZE    : 8               # batch size used to train
-  EPOCHS        : 50             # number of epochs to train
-  EVAL_INTERVAL : 50              # evaluation interval during training
+  EPOCHS        : 100             # number of epochs to train
+  EVAL_INTERVAL : 10              # evaluation interval during training
   AMP           : false           # use AMP in training
   DDP           : false           # use DDP training
 
 LOSS:
-  NAME          : CrossEntropy          # loss function name (ohemce, ce, dice)
+  NAME          : BinaryCrossEntropy          # loss function name (ohemce, ce, dice)
   CLS_WEIGHTS   : false            # use class weights in loss calculation
 
 OPTIMIZER:

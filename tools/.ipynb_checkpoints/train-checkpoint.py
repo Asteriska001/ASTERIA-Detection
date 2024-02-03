@@ -132,9 +132,10 @@ def main(cfg, gpu, save_dir):
                 #     input_x_transformed.append(x_transformed)
                 # input_x = torch.tensor(input_x_transformed).to(device)
             except:
-                print('Error in the inputx to device:')
-                for x in input_x:
-                    print(x,type(x))
+                pass
+                # print('Error in the inputx to device:')
+                # for x in input_x:
+                #     print(x,type(x))
             lbl = lbl.to(device)
             #print('input shape: '+str(input_x))
             with autocast(enabled=train_cfg['AMP']):

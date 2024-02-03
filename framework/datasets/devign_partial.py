@@ -69,6 +69,7 @@ def train_val_test_split(data_frame: pd.DataFrame, shuffle=True):
 
 class Devign_Partial(Dataset):
     def __init__(self, split: str, root:str, preprocess_format, input_path="./devign_partial_data/input"):
+        self.n_classes = 2
         input_dataset = loads(input_path)
         #port dataset
         assert split in ['train', 'val', 'test']
@@ -93,8 +94,8 @@ class Devign_Partial(Dataset):
 
     def __getitem__(self, index):
         #print('__getitem__  input_x: ',self.dataset.iloc[index].input)
-        input_x = self.dataset.iloc[index].input.x
-        label = torch.tensor(self.dataset.iloc[index].target)
+        input_x = self.dataset.iloc[index].input#.x
+        label = torch.tensor(self.dataset.iloc[index].target).float()
         return input_x, label
 
     #def get_loader(self, batch_size, shuffle=True):

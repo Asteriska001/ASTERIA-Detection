@@ -188,3 +188,7 @@ dist
 .coverage
 coverage.xml
 htmlcov
+
+
+# BigFile
+cwe119_cgd_gadget_vectors.pkl

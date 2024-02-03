@@ -1,5 +1,6 @@
 from .GNNReGVD import GNNReGVD
-from .Devign import Devign
+#from .Devign import Devign
+from .devign_re import Devign
 from .LineVul import LineVul
 from .VulDeePecker import VulDeepecker
 from .CodeXGLUE_baseline import CodeXGLUE_baseline
