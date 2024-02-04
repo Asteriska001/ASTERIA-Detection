@@ -34,11 +34,11 @@ class LineVul(RobertaForSequenceClassification):
         config.num_labels = 1
         super(LineVul, self).__init__(config=config)
                 
-        encoder = model_class.from_pretrained('microsoft/graphcodebert-base',#args.model_name_or_path,
+        encoder = model_class.from_pretrained('microsoft/codebert-base',#args.model_name_or_path,
                                             #from_tf=bool('.ckpt' in args.model_name_or_path),
                                             config=config,
                                              )#cache_dir=args.cache_dir if args.cache_dir else None)
-        tokenizer = tokenizer_class.from_pretrained('microsoft/graphcodebert-base',
+        tokenizer = tokenizer_class.from_pretrained('microsoft/codebert-base',
                                                 do_lower_case = None,#args.do_lower_case,
                                                        )#cache_dir=args.cache_dir if args.cache_dir else None)
         

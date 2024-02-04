@@ -4,10 +4,12 @@ from torch.utils.data import Dataset
 from pathlib import Path
 from typing import Tuple
 import numpy as np
+import pandas
 import json
 
 import os
-import pandas
+import pandas as pd
+from sklearn.model_selection import train_test_split
 from .vddata_utils.clean_gadget import clean_gadget
 from .vddata_utils.vectorize_gadget import GadgetVectorizer
 
@@ -91,34 +93,56 @@ class VDdata(Dataset):
             from types import SimpleNamespace
             args = SimpleNamespace(**args)
             
-            if split == 'val':
-                file_path = args.eval_data_file
-            elif split == 'train':
-                file_path = args.train_data_file
-            else:
-                file_path = args.test_data_file
-            
+            file_path = args.file_path
             parse_file(file_path)
             base = os.path.splitext(os.path.basename(file_path))[0]
             vector_filename = base + "_gadget_vectors.pkl"
             vector_length = 50
             if os.path.exists(vector_filename):
-                df = pandas.read_pickle(vector_filename)
+                df = pd.read_pickle(vector_filename)
             else:
                 df = get_vectors_df(file_path, vector_length)
                 df.to_pickle(vector_filename)
-            self.dataset = df
             #print('self dataset:\n',self.dataset)
+            # 假设 df 是您的 Pandas 数据集，且包含一个名为 'label' 的列
+            labels = df['val'].values
+
+            # 识别正负样本的索引
+            positive_idxs = np.where(labels == 1)[0]
+            negative_idxs = np.where(labels == 0)[0]
+
+            # 进行负样本的欠采样
+            undersampled_negative_idxs = np.random.choice(negative_idxs, len(positive_idxs), replace=False)
+
+            # 合并正样本索引和欠采样后的负样本索引
+            resampled_idxs = np.concatenate([positive_idxs, undersampled_negative_idxs])
+
+            # 根据新的索引划分数据集
+            train_idxs, val_idxs = train_test_split(resampled_idxs, test_size=0.2, stratify=labels[resampled_idxs])
+
+            # 创建训练集和验证集
+            train_df = df.iloc[train_idxs]
+            val_df = df.iloc[val_idxs]
+
+            # 输出结果以确认
+            print("Training Set Shape:", train_df.shape)
+            print("Validation Set Shape:", val_df.shape)
             
+            if split == 'val':
+                self.dataset = val_df
+            elif split == 'train':
+                self.dataset = train_df
+            else:
+                self.dataset = val_df
             sample_percent = args.training_percent if args.training_percent else 1.0
 
-            config_class, model_class, tokenizer_class = MODEL_CLASSES[tokenizer]
-            tokenizer = tokenizer_class.from_pretrained('microsoft/graphcodebert-base',
-                                                do_lower_case = None,#args.do_lower_case,
-                                                       )#cache_dir=args.cache_dir if args.cache_dir else None)
+#             config_class, model_class, tokenizer_class = MODEL_CLASSES[tokenizer]
+#             tokenizer = tokenizer_class.from_pretrained('microsoft/graphcodebert-base',
+#                                                 do_lower_case = None,#args.do_lower_case,
+#                                                        )#cache_dir=args.cache_dir if args.cache_dir else None)
             
-            #preprocess
-            self.preprocess = preprocess_format
+#             #preprocess
+#             self.preprocess = preprocess_format
 
             # self.examples = []
             # # with open(file_path) as f:

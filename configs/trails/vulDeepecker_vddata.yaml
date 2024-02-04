@@ -33,10 +33,7 @@ DATASET:
   PARAMS:
     tokenizer   : 'roberta'
     args        :
-      train_data_file: '/root/autodl-tmp/cwe119_cgd.txt'
-      eval_data_file : '/root/autodl-tmp/cwe119_cgd.txt'
-      test_data_file : '/root/autodl-tmp/cwe119_cgd.txt'
-      block_size     : 400
+      file_path : '/root/autodl-tmp/cwe119_cgd.txt'
       training_percent: 1.0
   PREPROCESS:
     ENABLE      : False #True
@@ -51,7 +48,7 @@ DATASET:
 TRAIN:
   INPUT_SIZE    : 128
   BATCH_SIZE    : 64               # batch size used to train
-  EPOCHS        : 10             # number of epochs to train
+  EPOCHS        : 4             # number of epochs to train
   EVAL_INTERVAL : 1              # evaluation interval during training
   AMP           : false           # use AMP in training
   DDP           : false           # use DDP training

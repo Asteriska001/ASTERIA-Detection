@@ -29,7 +29,7 @@ class VulDeepecker(nn.Module):
         self.y_test = torch.tensor(y_test, dtype=torch.float32)
         '''
         
-        self.lstm = nn.LSTM(input_size= 50,#400,vectors.shape[2], 
+        self.lstm = nn.LSTM(input_size=50,#400,vectors.shape[2], 
                             hidden_size=300, 
                             batch_first=True, 
                             bidirectional=True)

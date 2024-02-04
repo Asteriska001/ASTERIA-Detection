@@ -14,7 +14,7 @@ MODEL:
         feature_dim_size: 768
         hidden_size: 256
         num_GNN_layers: 2
-        model_name_or_path: microsoft/graphcodebert-base
+        model_name_or_path: microsoft/codebert-base
         remove_residual: False
         att_op: 'mul'
         num_classes : 2
@@ -29,10 +29,10 @@ DATASET:
     tokenizer   : 'roberta'
     args        :
       use_word_level_tokenizer : False
-      train_data_file: '/ASTERIA-Detection/external/LineVul/data/big-vul_dataset/val.csv' #train.csv'
-      eval_data_file : '/ASTERIA-Detection/external/LineVul/data/big-vul_dataset/val.csv'
-      test_data_file : '/ASTERIA-Detection/external/LineVul/data/big-vul_dataset/test.csv'
-      block_size     : 400
+      train_data_file: '/root/autodl-tmp/val.csv' #train.csv'
+      eval_data_file : '/root/autodl-tmp/val.csv'
+      test_data_file : '/root/autodl-tmp/test.csv'
+      block_size     : 512
       training_percent: 1.0
   PREPROCESS:
     ENABLE      : False
@@ -46,9 +46,9 @@ DATASET:
 
 TRAIN:
   INPUT_SIZE    : 128
-  BATCH_SIZE    : 8               # batch size used to train
+  BATCH_SIZE    : 16               # batch size used to train
   EPOCHS        : 10             # number of epochs to train
-  EVAL_INTERVAL : 50              # evaluation interval during training
+  EVAL_INTERVAL : 2              # evaluation interval during training
   AMP           : false           # use AMP in training
   DDP           : false           # use DDP training
 
@@ -58,7 +58,7 @@ LOSS:
 
 OPTIMIZER:
   NAME          : adamw           # optimizer name
-  LR            : 0.001           # initial learning rate used in optimizer
+  LR            : 0.00002           # initial learning rate used in optimizer
   WEIGHT_DECAY  : 0.01            # decay rate used in optimizer 
 
 SCHEDULER:

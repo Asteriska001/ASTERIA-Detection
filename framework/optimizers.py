@@ -1,5 +1,5 @@
 from torch import nn
-from torch.optim import AdamW, SGD
+from torch.optim import AdamW, SGD, Adamax
 
 
 def get_optimizer(model: nn.Module, optimizer: str, lr: float, weight_decay: float = 0.01):
@@ -17,5 +17,7 @@ def get_optimizer(model: nn.Module, optimizer: str, lr: float, weight_decay: flo
 
     if optimizer == 'adamw':
         return AdamW(params, lr, betas=(0.9, 0.999), eps=1e-8, weight_decay=weight_decay)
+    if optimizer == 'adamax':
+        return Adamax(params, lr, betas=(0.9, 0.999), eps=1e-8, weight_decay=weight_decay)
     else:
         return SGD(params, lr, momentum=0.9, weight_decay=weight_decay)

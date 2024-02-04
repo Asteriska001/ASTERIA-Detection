@@ -196,7 +196,7 @@ if __name__ == '__main__':
     #with open(args.cfg) as f:
     #    cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
-    fix_seeds(3407)
+    fix_seeds(123456)#fix_seeds(3407)
     setup_cudnn()
     gpu = setup_ddp()
     save_dir = Path(cfg['SAVE_DIR'])

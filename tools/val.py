@@ -35,17 +35,17 @@ def evaluate(model, dataloader, device):
         metrics.update(preds, labels)
     
     acc = metrics.compute_acc()
-    print(acc)
+    print('acc: ',acc)
     f1 = metrics.compute_f1()
-    print(f1)
+    print('f1: ',f1)
     rec = metrics.compute_rec()
-    print(rec)
+    print('rec: ',rec)
     prec = metrics.compute_prec()
-    print(prec)
+    print('prec: ',prec)
     roc_auc = metrics.compute_roc_auc()
-    print(roc_auc)
+    print('roc_auc: ',roc_auc)
     pr_auc = metrics.compute_pr_auc()
-    print(pr_auc)
+    print('pr_auc: ',pr_auc)
 
     return acc, f1, rec, prec, roc_auc, pr_auc
 
