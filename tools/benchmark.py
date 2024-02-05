@@ -29,6 +29,9 @@ from val import evaluate
 #ordered load yaml files
 from collections import OrderedDict
 
+from sklearnex import patch_sklearn, unpatch_sklearn
+patch_sklearn()
+
 def get_max_cuda_memory() -> int:
     """Returns the maximum GPU memory occupied by tensors in megabytes (MB) for
     a given device. By default, this returns the peak allocated memory since
@@ -121,7 +124,7 @@ def main(cfg, gpu, save_dir):
     train_loss = 0.0
     nb_eval_steps = 0
     warmup_steps = 5
-    total_steps = 2100
+    total_steps = 3000
     exit_flag = False
 
     pure_inf_time = 0
