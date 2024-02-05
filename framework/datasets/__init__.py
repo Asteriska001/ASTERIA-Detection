@@ -6,6 +6,7 @@ from .CodeXGLUE import CodeXGLUE
 from .XFGDataset_build import DWK_Dataset
 from .IVDetect.IVDetectDataset import IVDetectDataset
 from .vddata import VDdata
+from .vdet_data import vdet_data
 
 __all__ = [
     'ReGVD',
@@ -14,5 +15,6 @@ __all__ = [
     'DWK_Dataset',
     'IVDetectDataset',
     'LineVul',
-    'VDdata'
+    'VDdata',
+    'vdet_data'
 ]

@@ -14,7 +14,8 @@ MODEL_DICT = {
     'VulBERTa_CNN': VulBERTa_CNN,
     'Concoction': Concoction,
     'DeepWuKong': DeepWuKong,
-    'IVDetect': IVDmodel
+    'IVDetect': IVDmodel,
+    'Vdet_for_java': vdet_for_java
 }
 
 

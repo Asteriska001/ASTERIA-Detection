@@ -9,6 +9,7 @@ from .VulBERTa_CNN import VulBERTa_CNN
 from .Concoction import Concoction
 from .deepwukong.DWK_gnn import DeepWuKong
 from .IVDetect.IVDetect_model import IVDmodel
+from .VDET import vdet_for_java
 
 __all__ = [
     'GNNReGVD',
@@ -20,5 +21,6 @@ __all__ = [
     'VulBERTa_CNN',
     'Concoction',
     'DeepWuKong',
-    'IVDmodel'
+    'IVDmodel',
+    'vdet_for_java'
 ]

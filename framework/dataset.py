@@ -21,7 +21,8 @@ DATASETS_DICT = {
     'DWK_Dataset': DWK_Dataset,
     'IVDDataset': IVDetectDataset,
     'LineVul': LineVul,
-    'VDdata': VDdata
+    'VDdata': VDdata,
+    'vdet_data': vdet_data
 }
 
 
