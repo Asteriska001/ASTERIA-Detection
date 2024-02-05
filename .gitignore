@@ -192,3 +192,4 @@ htmlcov
 
 # BigFile
 cwe119_cgd_gadget_vectors.pkl
+cwe399_cgd_gadget_vectors.pkl

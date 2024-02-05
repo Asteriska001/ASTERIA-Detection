@@ -141,6 +141,7 @@ class DWK_Dataset(Dataset):
             XFG_root_path: json file of list of XFG paths
         """
         super().__init__()
+        self.n_classes = 2
         args = SimpleNamespace(**args)
         self.__args = args
         
@@ -165,9 +166,11 @@ class DWK_Dataset(Dataset):
 
     def __getitem__(self, index) -> XFGSample:
         xfg: XFG = self.__XFGs[index]
+        return (xfg.to_torch(self.__vocab,self.__args.token_max_parts), torch.tensor(xfg.label))
+        '''
         return XFGSample(graph=xfg.to_torch(self.__vocab,
                                             self.__args.token_max_parts),
                          label=xfg.label)
-
+        '''
     def get_n_samples(self):
         return self.__n_samples

@@ -29,6 +29,10 @@ from val import evaluate
 #ordered load yaml files
 from collections import OrderedDict
 
+from sklearnex import patch_sklearn, unpatch_sklearn
+patch_sklearn()
+
+
 def ordered_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
     class OrderedLoader(Loader):
         pass

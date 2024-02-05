@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
+#from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DistributedSampler, RandomSampler
 from torch import distributed as dist
@@ -9,7 +9,7 @@ from framework.datasets import *
 from framework.datasets.XFGDataset_build import DWK_Dataset
 from framework.preprocess import get_preprocess
 
-from torch_geometric.data import Data
+from torch_geometric.data import Data,DataLoader
 from typing import List
 
 
@@ -95,9 +95,14 @@ def graph_collate_fn(batch):
     #print(batch[0])
     #(Data(edge_index=[2, 172], x=[205, 101], y=[1]), tensor(1))
     # 分解输入和标签
-    input_xs = [item[0] for item in batch]
-    labels = [item[1] for item in batch]
-    #print(labels,type(labels))
+    try:
+        input_xs = [item[0] for item in batch]
+        labels = [item[1] for item in batch]
+        #print(labels,type(labels))
+    except:
+        print('Error in graph_collate_fn')
+        for item in batch:
+            print(item)
     # 我们不能简单地堆叠input_xs，因为edge_index的大小是不同的
     # 所以我们将其保留为一个列表
     data_list = []
