@@ -9,11 +9,11 @@ import numpy as np
 import random
 
 
-tokenizer = transformers.AutoTokenizer.from_pretrained("CAUKiel/JavaBERT") 
+#tokenizer = transformers.AutoTokenizer.from_pretrained("CAUKiel/JavaBERT") 
 
 class vdet_for_java(nn.Module):
     DROPOUT_PROB = 0.1 # default value
-    N_CLASSES = 22 
+    N_CLASSES = 23 
 
     def __init__(self,encoder, config, tokenizer, args):
         super(vdet_for_java, self).__init__()
@@ -24,8 +24,11 @@ class vdet_for_java(nn.Module):
         self.step_scheduler_after = "batch"
 
 
-    def forward(self, ids, mask):
+    def forward(self, input_x):
         """Use last four hidden states"""
+        ids, mask = input_x
+        ids = ids.to('cuda')
+        mask = mask.to('cuda')
         all_hidden_states = torch.stack(self.model(ids, attention_mask=mask)["hidden_states"])
 
         concatenate_pooling = torch.cat(
@@ -37,6 +40,7 @@ class vdet_for_java(nn.Module):
         output_dropout = self.dropout(concatenate_pooling)
         
         output = self.linear(output_dropout)
+        #print('model outputs and shape: ',output,output.shape)
         return output
 
     # def forward(self, ids, mask):

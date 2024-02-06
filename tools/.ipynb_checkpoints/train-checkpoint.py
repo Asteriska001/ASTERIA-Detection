@@ -109,6 +109,7 @@ def main(cfg, gpu, save_dir):
             #print(data)
             #input_x = data.graphs
             #lbl = data.labels
+            #print(data)
             (input_x,lbl) = data
             #print('input_x data')
             #print(input_x)
@@ -153,6 +154,8 @@ def main(cfg, gpu, save_dir):
                 #logits = model(my_data_list, edge_index_list)
                 #print(logits.shape)
                 #print(lbl.shape)
+                # print('logits.shape: ',logits.shape)
+                # print('lbl.shape: ', lbl.shape)
                 loss = loss_fn(logits, lbl)
 
             scaler.scale(loss).backward()

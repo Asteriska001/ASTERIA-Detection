@@ -9,6 +9,9 @@ import json
 import random
 import transformers
 
+#torch.multiprocessing.set_start_method('spawn')
+
+torch.cuda.empty_cache()
 
 def tokenize_truncate(tokenizer, text_samples, max_length):
     full_input_ids = []
@@ -128,10 +131,31 @@ def smart_batching(tokenizer, max_length, text_samples, labels, batch_size):
     return final_input_ids, final_attention_masks, final_labels
 
 
+def tokenize_and_pad(tokenizer, text_samples, max_length):
+    input_ids = []
+    attention_masks = []
+
+    for text in text_samples:
+        encoded_dict = tokenizer.encode_plus(
+            text=text,
+            add_special_tokens=True,
+            max_length=max_length,
+            truncation=True,
+            padding='max_length',
+            return_attention_mask=True,
+            return_tensors='pt',
+        )
+
+        input_ids.append(encoded_dict['input_ids'])
+        attention_masks.append(encoded_dict['attention_mask'])
+
+    input_ids = torch.cat(input_ids, dim=0)
+    attention_masks = torch.cat(attention_masks, dim=0)
+
+    return input_ids, attention_masks
 
 class vdet_data(Dataset):
     def __init__(self, root: str, split: str , tokenizer, preprocess_format, args) -> None:
-        BATCH_SIZE = 16
         
         from types import SimpleNamespace
         args = SimpleNamespace(**args)
@@ -142,19 +166,38 @@ class vdet_data(Dataset):
         # string to arrays
         from ast import literal_eval
         train_dataset['one-hot'] = train_dataset['one-hot'].apply(literal_eval)
-        val_dataset['one-hot'] = val_dataset['one-hot'].apply(literal_eval)
+        #val_dataset['one-hot'] = val_dataset['one-hot'].apply(literal_eval)
         
-        train_input_ids, train_attn_masks, train_labels = smart_batching(tokenizer, 512, train_dataset['Code'], train_dataset['one-hot'], BATCH_SIZE) 
+        self.tokenizer = tokenizer
+        self.max_length = 512
+        self.train_dataset = train_dataset
+        self.input_ids, self.attention_masks = tokenize_and_pad(
+            tokenizer, 
+            self.train_dataset['Code'].tolist(), 
+            self.max_length
+        )
+
+        self.labels = torch.tensor(self.train_dataset['one-hot'].tolist())
+        # max_length = 512
+        # text_samples = train_dataset['Code']
+        # labels = train_dataset['one-hot']
+        # full_input_ids = tokenize_truncate(tokenizer, text_samples, max_length)
+        
+        #train_input_ids, train_attn_masks, train_labels = smart_batching(tokenizer, 512, train_dataset['Code'], train_dataset['one-hot'], BATCH_SIZE) 
         # test_input_ids, test_attn_masks, test_labels = smart_batching(tokenizer, 512, test_dataset['Code'], test_dataset['one-hot'], BATCH_SIZE)
         #val_input_ids, val_attn_masks, val_labels = smart_batching(tokenizer, 512, val_dataset['Code'], val_dataset['one-hot'], BATCH_SIZE)
         
-        self.examples_input_ids, self.examples_attn_masks, self.examples_labels = train_input_ids, train_attn_masks, train_labels
+        #self.examples_input_ids, self.examples_attn_masks, self.examples_labels = train_input_ids, train_attn_masks, train_labels
         
     def __len__(self):
-        return len(self.examples_input_ids)
+        print('The length of dataset: ',len(self.input_ids))
+        return len(self.input_ids)#len(self.examples_input_ids)
     
-    def __getitem__(self, index: Any) -> Any:
-        ids = self.examples_input_ids[index].to('cuda', dtype = torch.long)
-        mask = self.examples_attn_masks[index].to('cuda', dtype = torch.long)
-        label = self.examples_labels[index].to('cuda', dtype = torch.float)
-        return ((ids,mask), label)
+    def __getitem__(self, index):
+        ids = self.input_ids[index]#.to('cuda')#, dtype = torch.long)
+        #print('ids shape: ',ids.shape)
+        mask = self.attention_masks[index]#.to('cuda')#, dtype = torch.long)
+        #print('mask shape: ',mask.shape)
+        label = self.labels[index]#.to('cuda')#, dtype = torch.float)
+        #print('label shape: ',label.shape)
+        return (ids,mask),label

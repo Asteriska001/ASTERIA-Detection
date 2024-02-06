@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-#from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DistributedSampler, RandomSampler
 from torch import distributed as dist
@@ -9,7 +9,7 @@ from framework.datasets import *
 from framework.datasets.XFGDataset_build import DWK_Dataset
 from framework.preprocess import get_preprocess
 
-from torch_geometric.data import Data,DataLoader
+#from torch_geometric.data import Data,DataLoader
 from typing import List
 
 
