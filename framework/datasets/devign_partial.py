@@ -96,6 +96,8 @@ class Devign_Partial(Dataset):
         #print('__getitem__  input_x: ',self.dataset.iloc[index].input)
         input_x = self.dataset.iloc[index].input#.x
         label = torch.tensor(self.dataset.iloc[index].target).float()
+        print('input_x: ',input_x)
+        print('label: ',label)
         return input_x, label
 
     #def get_loader(self, batch_size, shuffle=True):

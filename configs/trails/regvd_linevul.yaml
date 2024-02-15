@@ -28,16 +28,17 @@ MODEL:
   PRETRAINED    : 'checkpoints/backbones/xx.pth'              # backbone model's weight 
 
 DATASET:
-  NAME          : ReGVD                                         # dataset name to be trained
+  NAME          : LineVul                                       # dataset name to be trained
   ROOT          : ''                         # dataset root path
   PARAMS:
     tokenizer   : 'roberta'
     args        :
-      train_data_file: '/root/autodl-fs/dataset/train.jsonl'
-      eval_data_file : '/root/autodl-fs/dataset/valid.jsonl'
-      test_data_file : '/root/autodl-fs/dataset/test.jsonl'
-      block_size     : 400
-      training_percent: 1.0
+                use_word_level_tokenizer : False
+                train_data_file: '/root/autodl-tmp/train.csv' #train.csv'
+                eval_data_file : '/root/autodl-tmp/val.csv'
+                test_data_file : '/root/autodl-tmp/test.csv'
+                block_size     : 512
+                training_percent: 1.0
   PREPROCESS:
     ENABLE      : False #True
     COMPOSE     : [ 

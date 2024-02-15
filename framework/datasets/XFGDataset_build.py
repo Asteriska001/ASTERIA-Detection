@@ -166,6 +166,10 @@ class DWK_Dataset(Dataset):
 
     def __getitem__(self, index) -> XFGSample:
         xfg: XFG = self.__XFGs[index]
+        input_x = xfg.to_torch(self.__vocab,self.__args.token_max_parts)
+        label = torch.tensor(xfg.label)
+        print('input_x: ',input_x)
+        print('label: ',label)
         return (xfg.to_torch(self.__vocab,self.__args.token_max_parts), torch.tensor(xfg.label))
         '''
         return XFGSample(graph=xfg.to_torch(self.__vocab,

@@ -200,4 +200,6 @@ class vdet_data(Dataset):
         #print('mask shape: ',mask.shape)
         label = self.labels[index]#.to('cuda')#, dtype = torch.float)
         #print('label shape: ',label.shape)
+        print('input_x: ',input_x)
+        print('label: ',label)
         return (ids,mask),label

@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from pathlib import Path
 from typing import Tuple
 import numpy as np
-import json
+import json,math
 
 from framework.models.modules.transformers.transformers import *
 
@@ -21,8 +21,42 @@ class InputFeatures(object):
         self.input_ids = input_ids
         self.idx=str(idx)
         self.label=label
+#diverse csv
+def convert_examples_to_features_diverse(js,tokenizer,args):
+    #source
+    #print(js)
+    try:
+        code=' '.join(js['func'].split())
+        code_tokens=tokenizer.tokenize(code)[:args.block_size-2]
+        source_tokens =[tokenizer.cls_token]+code_tokens+[tokenizer.sep_token]
+        source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
+        padding_length = args.block_size - len(source_ids)
+        source_ids+=[tokenizer.pad_token_id]*padding_length
+        return InputFeatures(source_tokens,source_ids,js['idx'],js['target'])
+    except:
+        print(js)
+#d2a csv
+def convert_examples_to_features_d2a(js,tokenizer,args):
+    #source
+    code=' '.join(js['code'].split())
+    code_tokens=tokenizer.tokenize(code)[:args.block_size-2]
+    source_tokens =[tokenizer.cls_token]+code_tokens+[tokenizer.sep_token]
+    source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
+    padding_length = args.block_size - len(source_ids)
+    source_ids+=[tokenizer.pad_token_id]*padding_length
+    return InputFeatures(source_tokens,source_ids,js['id'],js['label'])
 
-
+#MSR csv
+def convert_examples_to_features_MSR(js,tokenizer,args):
+    #source
+    code=' '.join(js['processed_func'].split())
+    code_tokens=tokenizer.tokenize(code)[:args.block_size-2]
+    source_tokens =[tokenizer.cls_token]+code_tokens+[tokenizer.sep_token]
+    source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
+    padding_length = args.block_size - len(source_ids)
+    source_ids+=[tokenizer.pad_token_id]*padding_length
+    return InputFeatures(source_tokens,source_ids,js['index'],js['target'])
+        
 def convert_examples_to_features(js,tokenizer,args):
     #source
     code=' '.join(js['func'].split())
@@ -32,6 +66,28 @@ def convert_examples_to_features(js,tokenizer,args):
     padding_length = args.block_size - len(source_ids)
     source_ids+=[tokenizer.pad_token_id]*padding_length
     return InputFeatures(source_tokens,source_ids,js['idx'],js['target'])
+        
+# def convert_examples_to_features(js,tokenizer,args):
+#     #source
+#     code=' '.join(js['code'].split())
+#     code_tokens=tokenizer.tokenize(code)[:args.block_size-2]
+#     source_tokens =[tokenizer.cls_token]+code_tokens+[tokenizer.sep_token]
+#     source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
+#     padding_length = args.block_size - len(source_ids)
+#     source_ids+=[tokenizer.pad_token_id]*padding_length
+#     return InputFeatures(source_tokens,source_ids,js['size'],1)
+
+def convert_examples_to_features_csv(js,tokenizer,args):
+    #vdet
+    #print('+'+js)
+    code=' '.join(js['Code'].split())
+    code_tokens=tokenizer.tokenize(code)[:args.block_size-2]
+    source_tokens =[tokenizer.cls_token]+code_tokens+[tokenizer.sep_token]
+    source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
+    padding_length = args.block_size - len(source_ids)
+    source_ids+=[tokenizer.pad_token_id]*padding_length
+    target = int(js['isVulnerable'])
+    return InputFeatures(source_tokens,source_ids,js['id'],target)
 
 
 class ReGVD(Dataset):
@@ -63,11 +119,28 @@ class ReGVD(Dataset):
             self.preprocess = preprocess_format
 
             self.examples = []
-            with open(file_path) as f:
-                for line in f:
-                    js=json.loads(line.strip())
-                    self.examples.append(convert_examples_to_features(js, tokenizer, args))
-
+            # reveal original data
+            # with open(file_path) as f:
+            #     datas = json.loads(f.read())                
+            #     for js in datas:
+            #         self.examples.append(convert_examples_to_features(js, tokenizer, args))
+            
+            #vdet csv data
+            # import pandas as pd
+            # df = pd.read_csv(file_path)
+            # for idx, record in df.iterrows():
+            #     self.examples.append(convert_examples_to_features_d2a(record, tokenizer, args))
+            
+            # regvd original data
+            # with open(file_path) as f:
+            #     for line in f:
+            #         js=json.loads(line.strip())
+            #         self.examples.append(convert_examples_to_features(js, tokenizer, args))
+            import pandas as pd
+            df = pd.read_csv(file_path)
+            for idx, record in df.iterrows():
+                self.examples.append(convert_examples_to_features_diverse(record, tokenizer, args))
+            
             total_len = len(self.examples)
             num_keep = int(sample_percent * total_len)
 
@@ -92,7 +165,22 @@ class ReGVD(Dataset):
 
     def __getitem__(self, i):
         input_x = torch.tensor(self.examples[i].input_ids)
-        label = torch.tensor(self.examples[i].label)
+        try:
+            # Attempt to convert label to float
+            label_value = float(self.examples[i].label)
+            
+            # Check for NaN and handle it
+            if math.isnan(label_value):
+                # Handle NaN value, set to default value, e.g., 0
+                label = torch.tensor(0)
+            else:
+                # Convert to integer and then tensor
+                label = torch.tensor(int(label_value))
+        except ValueError:
+            # Handle case where conversion to float fails
+            # Set to a default value or handle differently
+            label = torch.tensor(0)  # Example: default value
+        #label = torch.tensor(int(self.examples[i].label))
 
         if self.preprocess:
             #print("former data:")
@@ -103,4 +191,6 @@ class ReGVD(Dataset):
             #print(input_x.shape)
             #print(label)
             #assert 0 == 1
+        # print('input_x: ',input_x)
+        # print('label: ',label)
         return input_x, label

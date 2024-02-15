@@ -33,8 +33,8 @@ DATASET:
   PARAMS:
     tokenizer   : 'roberta'
     args        :
-      train_data_file: '/root/autodl-fs/dataset/train.jsonl'
-      eval_data_file : '/root/autodl-fs/dataset/valid.jsonl'
+      train_data_file: '/root/autodl-tmp/diverseful/train_set.csv'
+      eval_data_file : '/root/autodl-tmp/diverseful/validate_set.csv'
       test_data_file : '/root/autodl-fs/dataset/test.jsonl'
       block_size     : 400
       training_percent: 1.0
