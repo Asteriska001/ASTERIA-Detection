@@ -33,8 +33,8 @@ DATASET:
   PARAMS:
     tokenizer   : 'roberta'
     args        :
-      train_data_file: '/root/autodl-tmp/reveal/train_set.csv'
-      eval_data_file : '/root/autodl-tmp/reveal/validate_set.csv'
+      train_data_file: '/root/autodl-tmp/draper/val_set.xlsx'
+      eval_data_file : '/root/autodl-tmp/draper/val_set.xlsx'
       test_data_file : '/root/autodl-fs/dataset/test.jsonl'
       block_size     : 400
       training_percent: 1.0

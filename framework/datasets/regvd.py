@@ -21,6 +21,36 @@ class InputFeatures(object):
         self.input_ids = input_ids
         self.idx=str(idx)
         self.label=label
+
+        
+#draper csv
+def convert_examples_to_features_draper(js,tokenizer,args):
+    #source
+    #print(js)
+    try:
+        code=' '.join(js['func'].split())
+        code_tokens=tokenizer.tokenize(code)[:args.block_size-2]
+        source_tokens =[tokenizer.cls_token]+code_tokens+[tokenizer.sep_token]
+        source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
+        padding_length = args.block_size - len(source_ids)
+        source_ids+=[tokenizer.pad_token_id]*padding_length
+        return InputFeatures(source_tokens,source_ids,js['idx'],js['target'])
+    except:
+        print(js)
+#reveal csv
+def convert_examples_to_features_reveal(js,tokenizer,args):
+    #source
+    #print(js)
+    try:
+        code=' '.join(js['code'].split())
+        code_tokens=tokenizer.tokenize(code)[:args.block_size-2]
+        source_tokens =[tokenizer.cls_token]+code_tokens+[tokenizer.sep_token]
+        source_ids =  tokenizer.convert_tokens_to_ids(source_tokens)
+        padding_length = args.block_size - len(source_ids)
+        source_ids+=[tokenizer.pad_token_id]*padding_length
+        return InputFeatures(source_tokens,source_ids,js['idx'],js['target'])
+    except:
+        print(js)
 #diverse csv
 def convert_examples_to_features_diverse(js,tokenizer,args):
     #source
@@ -137,9 +167,9 @@ class ReGVD(Dataset):
             #         js=json.loads(line.strip())
             #         self.examples.append(convert_examples_to_features(js, tokenizer, args))
             import pandas as pd
-            df = pd.read_csv(file_path)
+            df = pd.read_excel(file_path)
             for idx, record in df.iterrows():
-                self.examples.append(convert_examples_to_features_diverse(record, tokenizer, args))
+                self.examples.append(convert_examples_to_features_draper(record, tokenizer, args))
             
             total_len = len(self.examples)
             num_keep = int(sample_percent * total_len)
